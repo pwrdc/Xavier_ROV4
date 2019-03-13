@@ -61,7 +61,7 @@ void PathDetector::run()
     createControlWindow();
     
     while (isRunning) {
-        cv::Mat frame = captureSingleFrame();
+        frame = captureSingleFrame();
         
         std::vector<double> tempVector = findLinesParameters(frame);
         
@@ -189,8 +189,6 @@ std::vector<double>PathDetector::countAverage(std::vector<std::vector<double>> &
 std::vector<cv::Vec2f> PathDetector::detectLines(cv::Mat &frame)
 {
     std::vector<cv::Vec2f> lines;
-    std::vector<std::vector<cv::Point> > contours;
-    std::vector<cv::Vec4i> hierarchy;
     
     cv::Mat cannyImg = prepareImage(frame);
     
@@ -244,7 +242,7 @@ cv::Mat PathDetector::thresholdImage(cv::Mat &imgHSV)
     inRange(imgHSV, cv::Scalar(60, 120, 0), cv::Scalar(179, 255, 255), imgThresholded);
     bitwise_not(imgThresholded, imgThresholded);
     
-    imshow("tresh", imgThresholded);
+    //imshow("tresh", imgThresholded);
     
     return imgThresholded;
 }
@@ -301,14 +299,6 @@ void PathDetector::countCoordinates(cv::Mat &printedFrame)
     pt2.x = cvRound(x0 - 1000 * -sin(actualParameters[2]));
     pt2.y = cvRound(y0 - 1000 * cos(actualParameters[2]));
     line(printedFrame, pt1, pt2, cv::Scalar(0, 0, 255), 3, CV_AA);
-    
-    /*x0 = cos(180 * M_PI / 180) * 100;
-    y0 = sin(180 * M_PI / 180) * 100;
-    pt1.x = cvRound(x0 + 1000 * -sin(180 * M_PI / 180));
-    pt1.y = cvRound(y0 + 1000 * cos(180 * M_PI / 180));
-    pt2.x = cvRound(x0 - 1000 * -sin(180 * M_PI / 180));
-    pt2.y = cvRound(y0 - 1000 * cos(180 * M_PI / 180));
-    line(printedFrame, pt1, pt2, cv::Scalar(0, 255, 0), 3, CV_AA);*/ 
 }
 
 void PathDetector::countAngleDifference()
@@ -316,8 +306,7 @@ void PathDetector::countAngleDifference()
     if (actualParameters[0] <= M_PI/2) angleDifference[0] = actualParameters[0] * 180 / M_PI;
     else angleDifference[0] = actualParameters[0] * 180 / M_PI - 180;
     if (actualParameters[2] <= M_PI/2) angleDifference[1] = actualParameters[2] * 180 / M_PI;
-    else angleDifference[1] = actualParameters[2] * 180 / M_PI;
-    //cout << "angle1: " << angleDifference[0] << " angle2: " << angleDifference[1] << "\n";
+    else angleDifference[1] = actualParameters[2] * 180 / M_PI - 180;
 }
 
 int PathDetector::getRotationAngle()
@@ -329,15 +318,19 @@ int PathDetector::getRotationAngle()
 map<string,int> PathDetector::getIntersectionCoordinates(std::vector<double> actualParameters)
 {
     map<string, int> coordinates;
-    double a1,a2,b1,b2,x,y;
+    double a1,a2,b1,b2,c1,c2,d,x,y;
     
-    a1 = 1/(atan(actualParameters[0])); //theta1
-    a2 = 1/(atan(actualParameters[2])); //theta2
-    b1 = actualParameters[1]; //rho1
-    b2 = actualParameters[3]; //rho2
+    a1 = cos(actualParameters[0]);
+    b1 = sin(actualParameters[0]);
+    c1 = actualParameters[1];
+    a2 = cos(actualParameters[2]);
+    b2 = sin(actualParameters[2]);
+    c2 = actualParameters[3];
+    d = a1*b2 - a2*b1;
     
-    x = (b2 - b1)/(a1 - a2);
-    y = (a1*b2 - a2*b1)/(a1 - a2);
+    x = (b1 * c1 - b2*c2)/d - frame.size().width/2;
+    y = frame.size().height/2 - (a1*c2 - a2*c1)/d;
+    
     cout << "X: " << x << endl;
     cout << "Y: " << y << endl;
     

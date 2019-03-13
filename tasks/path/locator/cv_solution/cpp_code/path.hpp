@@ -37,6 +37,7 @@ private:
     std::vector<double> angleDifference;
     double momentumPercent;
     cv::VideoCapture videoCap;
+    cv::Mat frame;
     cv::Mat image;
     Logger logger;
     
