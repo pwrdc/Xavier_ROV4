@@ -1,11 +1,4 @@
-//
-//  logger.cpp
-//  ObjectDetect
-//
-//  Created by Bartosz Stucke on 29/12/2018.
-//  Copyright © 2018 Bartosz Stucke. All rights reserved.
-//
-
+#define _CRT_SECURE_NO_WARNINGS
 #include "logger.hpp"
 #include <ctime>
 #include <iostream>
@@ -15,6 +8,7 @@
 
 Logger::Logger()
 {
+	std::cout << "Nazwa: " << createFileName() << std::endl;
     plik.open(createFileName(), ios::app);
     if(!plik.is_open())
     {

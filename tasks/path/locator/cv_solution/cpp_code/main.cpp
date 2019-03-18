@@ -1,8 +1,8 @@
-#include "PathDetector.hpp"
+#include "path.hpp"
 
 int main()
 {
-    PathDetector detector("GOPR1142_4.mp4");
+    PathDetector detector("1.png");
     detector.run();
     
     return 0;

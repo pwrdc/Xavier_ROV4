@@ -1,6 +1,7 @@
+#define _USE_MATH_DEFINES
 #include "path.hpp"
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <numeric>
 #include <string>
 #include <map>
@@ -73,7 +74,7 @@ void PathDetector::run()
         
         cout << "rotationAngle:" << getRotationAngle() << "\n";
         
-        getIntersectionCoordinates(actualParameters);
+        getIntersectionCoordinates(actualParameters, frame);
         
         printFrame(frame);
         
@@ -86,7 +87,7 @@ void PathDetector::run()
 
 void PathDetector::createControlWindow()
 {
-    cv::namedWindow("Control Window", CV_WINDOW_NORMAL);
+   // cv::namedWindow("Control Window", CV_WINDOW_NORMAL);
 }
 
 void PathDetector::checkESC()
@@ -191,6 +192,7 @@ std::vector<cv::Vec2f> PathDetector::detectLines(cv::Mat &frame)
     std::vector<cv::Vec2f> lines;
     
     cv::Mat cannyImg = prepareImage(frame);
+	cv::imwrite("canny.png", cannyImg);
     
     HoughLines(cannyImg, lines, 1, CV_PI / 180, 50, 0, 0);
     
@@ -257,11 +259,9 @@ void PathDetector::doMorphOperations(cv::Mat &imgThresholded)
 
 void PathDetector::printParameters(std::string name, std::vector<double> vector)
 {
-    for (auto Element : vector) {
-        std::cout << name << ": " << Element << std::endl;
-    }
-    
-    std::cout << std::endl << std::endl;
+	std::cout << "ThetaRED:\t" << actualParameters[2] << "\t| RhoRED:\t" << actualParameters[3] << std::endl;
+	std::cout << "ThetaGREEN:\t" << actualParameters[0] << "\t\t| RhoGREEN:\t" << actualParameters[1] << std::endl<<std::endl;
+	return;
 }
 
 void PathDetector::updateParameters(std::vector<double> vector)
@@ -276,20 +276,33 @@ void PathDetector::printFrame(cv::Mat printedFrame)
     countCoordinates(printedFrame);
     
     cv::imshow("Path", printedFrame);
+	cv::imwrite("Detected.png", printedFrame);
 }
 
 void PathDetector::countCoordinates(cv::Mat &printedFrame)
 {
     cv::Point pt1, pt2;
     double x0{ 0 }, y0{ 0 };
+
+	pt1.x = 0;
+	pt1.y = 0;
+	pt2.x = actualParameters[1] * cos(actualParameters[0]);
+	pt2.y = actualParameters[1] * sin(actualParameters[0]);
+	line(printedFrame, pt1, pt2, cv::Scalar(0, 255, 0), 3, CV_AA);
+
+	pt1.x = 0;
+	pt1.y = 0;
+	pt2.x = actualParameters[3] * cos(actualParameters[2]);
+	pt2.y = actualParameters[3] * sin(actualParameters[2]);
+	line(printedFrame, pt1, pt2, cv::Scalar(0, 0, 255), 3, CV_AA);
     
-    x0 = cos(actualParameters[0]) * actualParameters[1];
+    /*x0 = cos(actualParameters[0]) * actualParameters[1];
     y0 = sin(actualParameters[0]) * actualParameters[1];
     pt1.x = cvRound(x0 + 1000 * -sin(actualParameters[0]));
     pt1.y = cvRound(y0 + 1000 * cos(actualParameters[0]));
     pt2.x = cvRound(x0 - 1000 * -sin(actualParameters[0]));
     pt2.y = cvRound(y0 - 1000 * cos(actualParameters[0]));
-    line(printedFrame, pt1, pt2, cv::Scalar(0, 0, 255), 3, CV_AA);
+    line(printedFrame, pt1, pt2, cv::Scalar(0, 255, 0), 3, CV_AA);
     
     
     x0 = cos(actualParameters[2]) * actualParameters[3];
@@ -298,7 +311,7 @@ void PathDetector::countCoordinates(cv::Mat &printedFrame)
     pt1.y = cvRound(y0 + 1000 * cos(actualParameters[2]));
     pt2.x = cvRound(x0 - 1000 * -sin(actualParameters[2]));
     pt2.y = cvRound(y0 - 1000 * cos(actualParameters[2]));
-    line(printedFrame, pt1, pt2, cv::Scalar(0, 0, 255), 3, CV_AA);
+    line(printedFrame, pt1, pt2, cv::Scalar(0, 0, 255), 3, CV_AA);*/
 }
 
 void PathDetector::countAngleDifference()
@@ -309,33 +322,51 @@ void PathDetector::countAngleDifference()
     else angleDifference[1] = actualParameters[2] * 180 / M_PI - 180;
 }
 
+std::pair<double, double> PathDetector::normalizeCoordinates(std::pair<double, double> coords)
+{
+	//TODO: Make normalization in range [-1, 1]
+	return std::pair<double, double>();
+}
+
 int PathDetector::getRotationAngle()
 {
     if(abs(angleDifference[0]) < abs(angleDifference[1])) return int(angleDifference[1]);
     else return int(angleDifference[0]);
 }
 
-map<string,int> PathDetector::getIntersectionCoordinates(std::vector<double> actualParameters)
+std::pair<double,double> PathDetector::getIntersectionCoordinates(std::vector<double> actualParameters, cv::Mat &printedFrame)
 {
-    map<string, int> coordinates;
-    double a1,a2,b1,b2,c1,c2,d,x,y;
-    
-    a1 = cos(actualParameters[0]);
-    b1 = sin(actualParameters[0]);
-    c1 = actualParameters[1];
-    a2 = cos(actualParameters[2]);
-    b2 = sin(actualParameters[2]);
-    c2 = actualParameters[3];
-    d = a1*b2 - a2*b1;
-    
-    x = (b1 * c1 - b2*c2)/d - frame.size().width/2;
-    y = frame.size().height/2 - (a1*c2 - a2*c1)/d;
-    
-    cout << "X: " << x << endl;
-    cout << "Y: " << y << endl;
-    
-    coordinates["x"] = x;
-    coordinates["y"] = y;
+	std::vector<std::pair<double, double>> lineCoefficients;
+
+	for (int i = 0; i < actualParameters.size(); i += 2) {
+		std::pair<double, double> temp;
+		temp.first = -(cos(actualParameters[i]) / sin(actualParameters[i]));
+		temp.second = actualParameters[i + 1] / sin(actualParameters[0]);
+		lineCoefficients.push_back(temp);
+	}
+
+	std::pair<double, double> coordinates;
+	double x = (lineCoefficients[1].second - lineCoefficients[0].second) / (lineCoefficients[0].first - lineCoefficients[1].first);
+	double y = lineCoefficients[0].first*(lineCoefficients[1].second - lineCoefficients[0].second) / (lineCoefficients[0].first - lineCoefficients[1].first) + lineCoefficients[0].second;
+	coordinates.first = x;
+	coordinates.second = y;
+	std::cout << "X: " << x << std::endl;
+	std::cout << "Y: " << y << std::endl;
+
+	circle(printedFrame, cv::Point(x, y), 10, cv::Scalar(255, 0, 0), 3);
+
+	cv::Point pt1, pt2;
+	pt1.x = 0;
+	pt1.y = lineCoefficients[0].second;
+	pt2.x = 1000;
+	pt2.y = 1000 * lineCoefficients[0].first + lineCoefficients[0].second;
+	line(printedFrame, pt1, pt2, cv::Scalar(255, 255, 0), 3, CV_AA);
+
+	pt1.x = 0;
+	pt1.y = lineCoefficients[1].second;
+	pt2.x = 1000;
+	pt2.y = 1000 * lineCoefficients[1].first + lineCoefficients[1].second;
+	line(printedFrame, pt1, pt2, cv::Scalar(255, 255, 0), 3, CV_AA);
     
     return coordinates;
 }
