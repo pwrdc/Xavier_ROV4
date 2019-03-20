@@ -17,7 +17,7 @@ public:
     
     void run();
     int getRotationAngle(); //calculating an value of angle to turn around
-	std::pair<double, double> getIntersectionCoordinates(std::vector<double> actualParameters, cv::Mat &printedFrame); //counting intersection point
+    map<string,int> getIntersectionCoordinates(); //counting intersection point
     
 private:
     bool isRunning;
@@ -62,6 +62,6 @@ private:
     void printParameters(std::string name, std::vector<double> vector);
     void updateParameters(std::vector<double> vector); //momentum 
     void countAngleDifference(); //adjust proper angles values
-	std::pair<double, double> normalizeCoordinates(std::pair<double, double> coords);
+    void normalizeCoordinates(double& x, double& y);
 };
 

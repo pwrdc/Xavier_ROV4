@@ -2,7 +2,7 @@
 
 int main()
 {
-    PathDetector detector("1.png");
+    PathDetector detector("a.mp4");
     detector.run();
     
     return 0;

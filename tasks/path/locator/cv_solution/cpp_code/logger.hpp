@@ -1,7 +1,14 @@
+//
+//  logger.hpp
+//  ObjectDetect
+//
+//  Created by Bartosz Stucke on 29/12/2018.
+//  Copyright © 2018 Bartosz Stucke. All rights reserved.
+//
+
 #pragma once
 
 #include <fstream>
-#include <vector>
 
 using namespace std;
 
