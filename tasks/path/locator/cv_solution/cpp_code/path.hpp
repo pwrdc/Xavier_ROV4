@@ -16,14 +16,14 @@ public:
     ~PathDetector();
     
     void run();
-    int getRotationAngle(); //calculating an value of angle to turn around
-    map<string,int> getIntersectionCoordinates(); //counting intersection point
+    int getRotationAngle();
+    map<string,int> getIntersectionCoordinates();
     
 private:
-    bool isRunning;
-    bool isAssigned;
-    int frameNumber;
-    bool isVideo;
+    bool isRunning = false;
+    bool isAssigned = false;
+    bool isVideo = true;
+    int frameNumber = 1;
     //
     // Description:
     //  Vector containing 4 parameters:
@@ -34,34 +34,46 @@ private:
     //  [3] -> rho2
     //
     std::vector<double> actualParameters;
+    //
+    // Description:
+    // Vector containing 2 parameters:
+    //
+    // [0] -> first line's angle
+    // [1] -> second line's angle
+    //
+    // both measured relative to vertical
     std::vector<double> angleDifference;
-    double momentumPercent;
+    double momentumPercent = 0.4;
     cv::VideoCapture videoCap;
     cv::Mat frame;
     cv::Mat image;
     Logger logger;
     
-    void printFrame(cv::Mat printedFrame); //showing original frame
-    void countCoordinates(cv::Mat &printedFrame); //counting Hough lines coordinates
-    cv::Mat captureSingleFrame(); //taking single frame of a video file
-    void createControlWindow(); //creating window
-    void checkESC(); //waiting for ESC to change isRunning flag
+    void createControlWindow();
+    void printFrame(cv::Mat printedFrame);
+    cv::Mat captureSingleFrame();
+    void printParameters(std::string name, std::vector<double> vector);
+    
+    void countCoordinates(cv::Mat &printedFrame);
+    void updateParameters(std::vector<double> vector);
+    void countAngleDifference();
+    void normalizeCoordinates(double& x, double& y);
+    std::vector<double> countAverage(std::vector<std::vector<double>> &tempParameters);
+    
     std::vector<double> findLinesParameters(cv::Mat frame);
     std::vector<std::vector<double>> sortParameters(std::vector<cv::Vec2f> &lines);
     void assignLineOrder(std::vector<cv::Vec2f> &lines);
     void assignLines(std::vector<cv::Vec2f> &lines, size_t &i, std::vector<std::vector<double>> &tempParameters);
     bool isFirstLine(std::vector<cv::Vec2f> &lines, const size_t &i);
     void assignFirstParameters(std::vector<double> & vector);
-    std::vector<double> countAverage(std::vector<std::vector<double>> &tempParameters);
     std::vector<cv::Vec2f> detectLines(cv::Mat &frame);
+    
     cv::Mat prepareImage(cv::Mat &frame);
     cv::Mat cannyEdges(cv::Mat &blurredImg);
     cv::Mat blurrImage(cv::Mat &imgThresholded);
     cv::Mat thresholdImage(cv::Mat &imgHSV);
     void doMorphOperations(cv::Mat &imgThresholded);
-    void printParameters(std::string name, std::vector<double> vector);
-    void updateParameters(std::vector<double> vector); //momentum 
-    void countAngleDifference(); //adjust proper angles values
-    void normalizeCoordinates(double& x, double& y);
+    
+    void checkIsRunning();
 };
 

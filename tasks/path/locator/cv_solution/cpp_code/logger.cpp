@@ -12,15 +12,25 @@
 #include <string>
 #include <vector>
 
-
 Logger::Logger()
 {
     plik.open(createFileName(), ios::app);
     if(!plik.is_open())
     {
-        cerr << "Plik jebnal";
+        cerr << "Cannot open log file";
         exit(-1);
     }
+}
+
+Logger::Logger(double momentumPercent)
+{
+    plik.open(createFileName(), ios::app);
+    if(!plik.is_open())
+    {
+        cerr << "Cannot open log file";
+        exit(-1);
+    }
+    makeHeader(momentumPercent);
 }
 
 Logger::~Logger()
@@ -28,18 +38,18 @@ Logger::~Logger()
     plik.close();
 }
 
-string Logger::getData()
+string Logger::getDate()
 {
     time_t tp = time(NULL);
     tm *ts = localtime(&tp);
-    string data = to_string(ts->tm_mday) + '-' + to_string(ts->tm_mon + 1) + '-' + to_string(ts->tm_year + 1900) + '_' + to_string(ts->tm_hour) + '-' + to_string(ts->tm_min);
+    string date = to_string(ts->tm_mday) + '-' + to_string(ts->tm_mon + 1) + '-' + to_string(ts->tm_year + 1900) + '_' + to_string(ts->tm_hour) + '-' + to_string(ts->tm_min);
     
-    return data;
+    return date;
 }
 
 string Logger::createFileName()
 {
-    return "Logs/" + getData() + ".txt";
+    return "Logs/" + getDate() + ".txt";
 }
 
 void Logger::saveLog(int frameNumber, vector<vector<double>> lineValues, vector<double> lineAverage)

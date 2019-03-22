@@ -16,17 +16,13 @@ class Logger
 {
 public:
     Logger();
+    Logger(double momentumPercent);
     ~Logger();
     void saveLog(int frameNumber, vector<vector<double>> linesValues, vector<double> lineAverage);
-    void makeHeader(double momentumPercent);
     
 private:
+    void makeHeader(double momentumPercent);
     fstream plik;
     string createFileName();
-    string getData();
-   
+    string getDate();
 };
-
-
-
-

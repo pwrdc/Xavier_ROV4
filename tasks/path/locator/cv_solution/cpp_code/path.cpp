@@ -12,46 +12,43 @@ PathDetector::PathDetector()
 {
 }
 
-PathDetector::PathDetector(std::string fileName) :
-actualParameters (4),
-angleDifference(2),
-frameNumber(1),
-isRunning {false},
-isAssigned {false},
-isVideo {true},
-momentumPercent {0.4},
-logger()
+PathDetector::PathDetector(string fileName) :
+actualParameters{4},
+angleDifference{2},
+logger{momentumPercent}
 {
-    size_t found = fileName.find("mp4");
+    size_t fileFormat = fileName.find("mp4");
     
-    if (found != string::npos)
+    if (fileFormat != string::npos)
     {
-        videoCap = *new VideoCapture(fileName);
+        videoCap = *new cv::VideoCapture(fileName);
         if (videoCap.isOpened() == false)
         {
-            std::cerr << "Cannot open the video file. Press any key..." << std::endl;
-            std::cin.get();
+            cerr << "Cannot open the video file. Press any key..." << endl;
+            cin.get();
             exit(-1);
         }
     }
     else
     {
-        image = imread(fileName);
+        image = cv::imread(fileName);
         if (image.empty())
         {
-            std::cerr << "Cannot open the image. Press any key..." << std::endl;
-            std::cin.get();
+            cerr << "Cannot open the image. Press any key..." << endl;
+            cin.get();
             exit(-1);
         }
         isVideo = false;
     }
-    logger.makeHeader(momentumPercent);
 }
         
         
 PathDetector::~PathDetector()
 {
-   if(isVideo) videoCap.release();
+   if(isVideo)
+   {
+       videoCap.release();
+   }
 }
 
 void PathDetector::run()
@@ -63,7 +60,7 @@ void PathDetector::run()
     while (isRunning) {
         frame = captureSingleFrame();
         
-        std::vector<double> tempVector = findLinesParameters(frame);
+        vector<double> tempVector = findLinesParameters(frame);
         
         updateParameters(tempVector);
         
@@ -79,8 +76,7 @@ void PathDetector::run()
         
         frameNumber++;
         
-        checkESC();
-        
+        checkIsRunning();
     }
 }
 
@@ -89,7 +85,7 @@ void PathDetector::createControlWindow()
     cv::namedWindow("Control Window", CV_WINDOW_NORMAL);
 }
 
-void PathDetector::checkESC()
+void PathDetector::checkIsRunning()
 {
     if (cv::waitKey(10) == 27)
     {
@@ -101,19 +97,17 @@ void PathDetector::checkESC()
     }
 }
 
-std::vector<double> PathDetector::findLinesParameters(cv::Mat frame)
+vector<double> PathDetector::findLinesParameters(cv::Mat frame)
 {
-    std::vector<std::vector<double>> tempParameters(4);
-    std::vector<double> averageParameters(4);
+    vector<vector<double>> tempParameters(4);
+    vector<double> averageParameters(4);
     
-    std::vector<cv::Vec2f> lines = detectLines(frame);
+    vector<cv::Vec2f> lines = detectLines(frame);
     
     if (!lines.empty())
     {
         tempParameters = sortParameters(lines);
-        
         averageParameters = countAverage(tempParameters);
-        
     }
     
     assignFirstParameters(averageParameters);
@@ -121,14 +115,13 @@ std::vector<double> PathDetector::findLinesParameters(cv::Mat frame)
     logger.saveLog(frameNumber, tempParameters, averageParameters);
     
     return averageParameters;
-    
 }
 
-std::vector<std::vector<double>> PathDetector::sortParameters(std::vector<cv::Vec2f> &lines)
+vector<vector<double>> PathDetector::sortParameters(vector<cv::Vec2f> &lines)
 {
     assignLineOrder(lines);
     
-    std::vector<std::vector<double>> tempParameters(4);
+    vector<vector<double>> tempParameters(4);
     
     for (size_t i = 1; i < lines.size(); i++)
     {
@@ -138,14 +131,15 @@ std::vector<std::vector<double>> PathDetector::sortParameters(std::vector<cv::Ve
     return tempParameters;
 }
 
-void PathDetector::assignLineOrder(std::vector<cv::Vec2f> &lines)
+void PathDetector::assignLineOrder(vector<cv::Vec2f> &lines)
 {
-    if (!isAssigned) {
+    if (!isAssigned)
+    {
         actualParameters[0] = lines[0][1];
     }
 }
 
-void PathDetector::assignLines(std::vector<cv::Vec2f> &lines, size_t &i, std::vector<std::vector<double>> &tempParameters)
+void PathDetector::assignLines(vector<cv::Vec2f> &lines, size_t &i, vector<vector<double>> &tempParameters)
 {
     if (isFirstLine(lines, i))
     {
@@ -159,12 +153,13 @@ void PathDetector::assignLines(std::vector<cv::Vec2f> &lines, size_t &i, std::ve
     }
 }
 
-bool PathDetector::isFirstLine(std::vector<cv::Vec2f> & lines, const size_t &i)
+bool PathDetector::isFirstLine(vector<cv::Vec2f> & lines, const size_t &i)
 {
-    return (lines[i][1] >= 0.8*actualParameters[0]) && (lines[i][1] < 1.2*actualParameters[0]);
+    double treshBottom = 0.8, treshTop = 1.2;
+    return (lines[i][1] >= treshBottom * actualParameters[0]) && (lines[i][1] < treshTop * actualParameters[0]);
 }
 
-void PathDetector::assignFirstParameters(std::vector<double> &vector)
+void PathDetector::assignFirstParameters(vector<double> &vector)
 {
     if (!isAssigned) {
         actualParameters[0] = vector[0];
@@ -175,24 +170,30 @@ void PathDetector::assignFirstParameters(std::vector<double> &vector)
     }
 }
 
-std::vector<double>PathDetector::countAverage(std::vector<std::vector<double>> &tempParameters)
+vector<double>PathDetector::countAverage(vector<vector<double>> &tempParameters)
 {
-    std::vector<double> averageParameters(4);
+    vector<double> averageParameters(4);
     
-    for (int i = 0; i < 4; i++) {
-        averageParameters[i] = std::accumulate(tempParameters[i].begin(), tempParameters[i].end(), 0.0) / tempParameters[i].size();
+    for (int i = 0; i < 4; i++)
+    {
+        averageParameters[i] = accumulate(tempParameters[i].begin(),
+                                          tempParameters[i].end(), 0.0) / tempParameters[i].size();
     }
-    
     return averageParameters;
 }
 
-std::vector<cv::Vec2f> PathDetector::detectLines(cv::Mat &frame)
+vector<cv::Vec2f> PathDetector::detectLines(cv::Mat &frame)
 {
-    std::vector<cv::Vec2f> lines;
+    int rho = 1; //The resolution of the parameter \rho in pixels
+    int tresh = 50; //The minimum number of intersections to “detect” a line
+    int srn = 0, stn = 0; //Default parameters to zero
+    double theta = CV_PI / 180; //The resolution of the parameter \theta in radians.
+    
+    vector<cv::Vec2f> lines;
     
     cv::Mat cannyImg = prepareImage(frame);
     
-    HoughLines(cannyImg, lines, 1, CV_PI / 180, 50, 0, 0);
+    HoughLines(cannyImg, lines, rho, theta, tresh, srn, stn);
     
     return lines;
 }
@@ -215,58 +216,65 @@ cv::Mat PathDetector::prepareImage(cv::Mat & frame)
 
 cv::Mat PathDetector::cannyEdges(cv::Mat &blurredImg)
 {
-    int lowTreshCanny = 0;
-    int highTreshCanny = 255 * 2;
-    int kernelSize = 7;
+    const int lowTreshCanny = 0;
+    const int highTreshCanny = 255 * 2;
+    const int kernelSize = 7;
     cv::Mat cannyImg;
     Canny(blurredImg, cannyImg, lowTreshCanny, highTreshCanny, kernelSize);
-    
-    //imshow("canny", cannyImg);
     
     return cannyImg;
 }
 
 cv::Mat PathDetector::blurrImage(cv::Mat &imgThresholded)
 {
+    const int kernelWidth = 9;
+    const int kernelHeight = 9;
+    const int sigmaX = 0; //The standard deviation in x
+    const int sigmaY = 0; //The standard deviation in y
     cv::Mat blurredImg;
-    cv::GaussianBlur(imgThresholded, blurredImg, cv::Size(9, 9), 0, 0);
     
-    //imshow("blurred", blurredImg);
+    cv::GaussianBlur(imgThresholded, blurredImg, cv::Size(kernelWidth, kernelHeight), sigmaX, sigmaY);
     
     return blurredImg;
 }
 
 cv::Mat PathDetector::thresholdImage(cv::Mat &imgHSV)
 {
+    int lowTreshH = 60, lowTreshS = 120, lowTreshV = 0;
+    int highTreshH = 179, highTreshS = 255, highTreshV = 255;
     cv::Mat imgThresholded;
-    inRange(imgHSV, cv::Scalar(60, 120, 0), cv::Scalar(179, 255, 255), imgThresholded);
-    bitwise_not(imgThresholded, imgThresholded);
     
-    //imshow("tresh", imgThresholded);
+    inRange(imgHSV, cv::Scalar(lowTreshH, lowTreshS, lowTreshV),
+            cv::Scalar(highTreshH, highTreshS, highTreshV), imgThresholded);
+    bitwise_not(imgThresholded, imgThresholded);
     
     return imgThresholded;
 }
 
 void PathDetector::doMorphOperations(cv::Mat &imgThresholded)
 {
-    erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(19, 19)));
-    dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(19, 19)));
-    dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(19, 19)));
-    erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(19, 19)));
+    const int kernelWidth = 19;
+    const int kernelHeight = 19;
+    
+    erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(kernelWidth, kernelHeight)));
+    dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(kernelWidth, kernelHeight)));
+    dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(kernelWidth, kernelHeight)));
+    erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(kernelWidth, kernelHeight)));
 }
 
-void PathDetector::printParameters(std::string name, std::vector<double> vector)
+void PathDetector::printParameters(string name, vector<double> vector)
 {
-    for (auto Element : vector) {
-        std::cout << name << ": " << Element << std::endl;
+    for (auto value : vector) {
+        cout << name << ": " << value << endl;
     }
     
-    std::cout << std::endl << std::endl;
+    cout << "\n\n";
 }
 
-void PathDetector::updateParameters(std::vector<double> vector)
+void PathDetector::updateParameters(vector<double> vector)
 {
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < vector.size(); i++)
+    {
         actualParameters[i] += momentumPercent * (vector[i] - actualParameters[i]);
     }
 }
@@ -303,16 +311,27 @@ void PathDetector::countCoordinates(cv::Mat &printedFrame)
 
 void PathDetector::countAngleDifference()
 {
-    if (actualParameters[0] <= M_PI/2) angleDifference[0] = actualParameters[0] * 180 / M_PI;
-    else angleDifference[0] = actualParameters[0] * 180 / M_PI - 180;
-    if (actualParameters[2] <= M_PI/2) angleDifference[1] = actualParameters[2] * 180 / M_PI;
-    else angleDifference[1] = actualParameters[2] * 180 / M_PI - 180;
+    if (actualParameters[0] <= M_PI/2)
+    {
+        angleDifference[0] = actualParameters[0] * 180 / M_PI;
+    }
+    else
+    {
+        angleDifference[0] = actualParameters[0] * 180 / M_PI - 180;
+    }
+    if (actualParameters[2] <= M_PI/2)
+    {
+        angleDifference[1] = actualParameters[2] * 180 / M_PI;
+    }
+    else
+    {
+        angleDifference[1] = actualParameters[2] * 180 / M_PI - 180;
+    }
 }
 
 int PathDetector::getRotationAngle()
 {
-    if(abs(angleDifference[0]) < abs(angleDifference[1])) return int(angleDifference[1]);
-    else return int(angleDifference[0]);
+    return abs(angleDifference[0]) < abs(angleDifference[1]) ? int(angleDifference[1]) : int(angleDifference[0]);
 }
 
 void PathDetector::normalizeCoordinates(double& x, double& y)
@@ -359,12 +378,15 @@ cv::Mat PathDetector::captureSingleFrame()
         
         if (isSuccess == false)
         {
-            std::cout << "Found the end of the video. Pres any key..." << std::endl;
-            std::cin.get();
+            cout << "Found the end of the video. Pres any key..." << endl;
+            cin.get();
             exit(0);
         }
     }
-    else capFrame = image;
+    else
+    {
+        capFrame = image;
+    }
     
     return capFrame;
 }
