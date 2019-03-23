@@ -68,10 +68,10 @@ private:
     void assignFirstParameters(std::vector<double> & vector);
     std::vector<cv::Vec2f> detectLines(cv::Mat &frame);
     
-    cv::Mat prepareImage(cv::Mat &frame);
-    cv::Mat cannyEdges(cv::Mat &blurredImg);
-    cv::Mat blurrImage(cv::Mat &imgThresholded);
-    cv::Mat thresholdImage(cv::Mat &imgHSV);
+    void prepareImage(cv::Mat &frame);
+    void cannyEdges(cv::Mat &blurredImg);
+    void blurrImage(cv::Mat &imgThresholded);
+    void thresholdImage(cv::Mat &imgHSV);
     void doMorphOperations(cv::Mat &imgThresholded);
     
     void checkIfRunning();

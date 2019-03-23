@@ -194,41 +194,36 @@ vector<cv::Vec2f> PathDetector::detectLines(cv::Mat &frame)
     
     vector<cv::Vec2f> lines;
     
-    cv::Mat cannyImg = prepareImage(frame);
+    prepareImage(frame);
     
-    HoughLines(cannyImg, lines, rho, theta, tresh, srn, stn);
+    HoughLines(frame, lines, rho, theta, tresh, srn, stn);
     
     return lines;
 }
 
-cv::Mat PathDetector::prepareImage(cv::Mat & frame)
+void PathDetector::prepareImage(cv::Mat &frame)
 {
-    cv::Mat preparedImg;
-    cv::cvtColor(frame, preparedImg, CV_BGR2HSV);
+    cv::cvtColor(frame, frame, CV_BGR2HSV);
     
-    preparedImg = thresholdImage(preparedImg);
+    thresholdImage(frame);
     
-    doMorphOperations(preparedImg);
+    doMorphOperations(frame);
     
-    preparedImg = blurrImage(preparedImg);
+    blurrImage(frame);
     
-    preparedImg = cannyEdges(preparedImg);
+    cannyEdges(frame);
     
-    return preparedImg;
 }
 
-cv::Mat PathDetector::cannyEdges(cv::Mat &blurredImg)
+void PathDetector::cannyEdges(cv::Mat &blurredImg)
 {
     const int lowTreshCanny = 0;
     const int highTreshCanny = 255 * 2;
     const int kernelSize = 7;
-    cv::Mat cannyImg;
-    Canny(blurredImg, cannyImg, lowTreshCanny, highTreshCanny, kernelSize);
-    
-    return cannyImg;
+    Canny(blurredImg, blurredImg, lowTreshCanny, highTreshCanny, kernelSize);
 }
 
-cv::Mat PathDetector::blurrImage(cv::Mat &imgThresholded)
+void PathDetector::blurrImage(cv::Mat &imgThresholded)
 {
     const int kernelWidth = 9;
     const int kernelHeight = 9;
@@ -236,12 +231,10 @@ cv::Mat PathDetector::blurrImage(cv::Mat &imgThresholded)
     const int sigmaY = 0; //The standard deviation in y
     cv::Mat blurredImg;
     
-    cv::GaussianBlur(imgThresholded, blurredImg, cv::Size(kernelWidth, kernelHeight), sigmaX, sigmaY);
-    
-    return blurredImg;
+    cv::GaussianBlur(imgThresholded, imgThresholded, cv::Size(kernelWidth, kernelHeight), sigmaX, sigmaY);
 }
 
-cv::Mat PathDetector::thresholdImage(cv::Mat &imgHSV)
+void PathDetector::thresholdImage(cv::Mat &imgHSV)
 {
     const int lowTreshH = 60;
     const int lowTreshS = 120;
@@ -249,13 +242,10 @@ cv::Mat PathDetector::thresholdImage(cv::Mat &imgHSV)
     const int highTreshH = 179;
     const int highTreshS = 255;
     const int highTreshV = 255;
-    cv::Mat imgThresholded;
     
     inRange(imgHSV, cv::Scalar(lowTreshH, lowTreshS, lowTreshV),
-            cv::Scalar(highTreshH, highTreshS, highTreshV), imgThresholded);
-    bitwise_not(imgThresholded, imgThresholded);
-    
-    return imgThresholded;
+            cv::Scalar(highTreshH, highTreshS, highTreshV), imgHSV);
+    bitwise_not(imgHSV, imgHSV);
 }
 
 void PathDetector::doMorphOperations(cv::Mat &imgThresholded)
@@ -274,7 +264,6 @@ void PathDetector::printParameters(string name, vector<double> vector)
     for (auto value : vector) {
         cout << name << ": " << value << endl;
     }
-    cout << endl;
 }
 
 void PathDetector::updateParameters(vector<double> vector)

@@ -12,6 +12,13 @@
 #include <string>
 #include <vector>
 #include <sys/time.h>
+#include <map>
+
+namespace constants
+{
+    typedef const map<int, string> parameters_map_type;
+    parameters_map_type param_map{{0, "Theta1: "},{1, "Rho1: "},{2, "Theta2: "}, {3, "Rho2: "}};
+}
 
 Logger::Logger()
 {
@@ -54,40 +61,25 @@ string Logger::getDate()
 
 string Logger::createFileName()
 {
-    return "Logs/PathDetection " + getDate() + ".txt";
+    return "Logs/PathDetection " + getDate() + ".log";
 }
 
 void Logger::saveLog(int frameNumber, vector<vector<double>> lineValues, vector<double> lineAverage)
 {
+    file << "Date: " << getDate() << "\n";
     file << "Frame: " << frameNumber << "\n";
-    file << "Theta1 wartosci: " ;
-    for (auto log : lineValues[0])
+    for (int i = 0; i < lineValues.size(); i ++)
     {
-        file << log << " ";
+        file << constants::param_map.find(i)->second;
+        for (auto log : lineValues[i])
+        {
+            file << log << " ";
+        }
+        file << '\n';
     }
-    file << '\n';
-    file << "Rho1 wartosci: ";
-    for (auto log : lineValues[1])
-    {
-        file << log << " ";
-    }
-    file << '\n';
-    file << "Theta2 wartosci: " ;
-    for (auto log : lineValues[2])
-    {
-        file << log << " ";
-    }
-    file << '\n';
-    file << "Rho2 wartosci: ";
-    for (auto log : lineValues[3])
-    {
-        file << log << " ";
-    }
-    file << "\n\n";
-    file << "Theta1: " << lineAverage[0] << '\n';
-    file << "Rho1: " << lineAverage[1] << '\n';
-    file << "Theta2: " << lineAverage[2] << '\n';
-    file << "Rho2: " << lineAverage[3] << "\n\n";
+    file << "\n";
+    file << "Theta1 average: " << lineAverage[0] << '\n' << "Rho1 average: " << lineAverage[1] << '\n';
+    file << "Theta2 average: " << lineAverage[2] << '\n' << "Rho2 average: " << lineAverage[3] << '\n';
 }
 
 void Logger::makeHeader(double momentumPercent)

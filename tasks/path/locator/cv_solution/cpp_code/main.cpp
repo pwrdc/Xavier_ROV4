@@ -4,7 +4,8 @@ int main()
 {
     const string video = "a.mp4";
     const string image = "f.png";
-    PathDetector detector{video};
+    
+    PathDetector detector{image};
     detector.run();
     
     return 0;
