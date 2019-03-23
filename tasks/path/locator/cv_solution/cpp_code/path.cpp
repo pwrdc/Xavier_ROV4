@@ -13,9 +13,9 @@ PathDetector::PathDetector()
 }
 
 PathDetector::PathDetector(string fileName) :
-actualParameters{4},
-angleDifference{2},
-logger{momentumPercent}
+actualParameters(4),
+angleDifference(2),
+logger(momentumPercent)
 {
     size_t fileFormat = fileName.find("mp4");
     
@@ -57,7 +57,8 @@ void PathDetector::run()
     
     createControlWindow();
     
-    while (isRunning) {
+    while (isRunning)
+    {
         frame = captureSingleFrame();
         
         vector<double> tempVector = findLinesParameters(frame);
@@ -76,7 +77,7 @@ void PathDetector::run()
         
         frameNumber++;
         
-        checkIsRunning();
+        checkIfRunning();
     }
 }
 
@@ -85,7 +86,7 @@ void PathDetector::createControlWindow()
     cv::namedWindow("Control Window", CV_WINDOW_NORMAL);
 }
 
-void PathDetector::checkIsRunning()
+void PathDetector::checkIfRunning()
 {
     if (cv::waitKey(10) == 27)
     {
@@ -155,7 +156,9 @@ void PathDetector::assignLines(vector<cv::Vec2f> &lines, size_t &i, vector<vecto
 
 bool PathDetector::isFirstLine(vector<cv::Vec2f> & lines, const size_t &i)
 {
-    double treshBottom = 0.8, treshTop = 1.2;
+    const double treshBottom = 0.8;
+    const double treshTop = 1.2;
+    
     return (lines[i][1] >= treshBottom * actualParameters[0]) && (lines[i][1] < treshTop * actualParameters[0]);
 }
 
@@ -184,10 +187,10 @@ vector<double>PathDetector::countAverage(vector<vector<double>> &tempParameters)
 
 vector<cv::Vec2f> PathDetector::detectLines(cv::Mat &frame)
 {
-    int rho = 1; //The resolution of the parameter \rho in pixels
-    int tresh = 50; //The minimum number of intersections to “detect” a line
-    int srn = 0, stn = 0; //Default parameters to zero
-    double theta = CV_PI / 180; //The resolution of the parameter \theta in radians.
+    const int rho = 1; //The resolution of the parameter \rho in pixels
+    const int tresh = 50; //The minimum number of intersections to “detect” a line
+    const int srn = 0, stn = 0; //Default parameters to zero
+    const double theta = CV_PI / 180; //The resolution of the parameter \theta in radians.
     
     vector<cv::Vec2f> lines;
     
@@ -240,8 +243,12 @@ cv::Mat PathDetector::blurrImage(cv::Mat &imgThresholded)
 
 cv::Mat PathDetector::thresholdImage(cv::Mat &imgHSV)
 {
-    int lowTreshH = 60, lowTreshS = 120, lowTreshV = 0;
-    int highTreshH = 179, highTreshS = 255, highTreshV = 255;
+    const int lowTreshH = 60;
+    const int lowTreshS = 120;
+    const int lowTreshV = 0;
+    const int highTreshH = 179;
+    const int highTreshS = 255;
+    const int highTreshV = 255;
     cv::Mat imgThresholded;
     
     inRange(imgHSV, cv::Scalar(lowTreshH, lowTreshS, lowTreshV),
@@ -267,8 +274,7 @@ void PathDetector::printParameters(string name, vector<double> vector)
     for (auto value : vector) {
         cout << name << ": " << value << endl;
     }
-    
-    cout << "\n\n";
+    cout << endl;
 }
 
 void PathDetector::updateParameters(vector<double> vector)

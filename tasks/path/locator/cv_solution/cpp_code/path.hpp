@@ -74,6 +74,6 @@ private:
     cv::Mat thresholdImage(cv::Mat &imgHSV);
     void doMorphOperations(cv::Mat &imgThresholded);
     
-    void checkIsRunning();
+    void checkIfRunning();
 };
 

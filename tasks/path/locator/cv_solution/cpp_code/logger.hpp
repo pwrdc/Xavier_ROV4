@@ -22,7 +22,7 @@ public:
     
 private:
     void makeHeader(double momentumPercent);
-    fstream plik;
+    fstream file;
     string createFileName();
     string getDate();
 };

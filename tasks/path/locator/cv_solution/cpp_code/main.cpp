@@ -2,8 +2,9 @@
 
 int main()
 {
-    string video = "a.mp4", image = "f.png";
-    PathDetector detector(image);
+    const string video = "a.mp4";
+    const string image = "f.png";
+    PathDetector detector{video};
     detector.run();
     
     return 0;
