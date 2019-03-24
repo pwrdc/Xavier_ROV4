@@ -16,8 +16,8 @@ public:
     ~PathDetector();
     
     void run();
-    int getRotationAngle();
-    map<string,int> getIntersectionCoordinates();
+    int getRotationAngle(cv::Mat &image);
+    map<string,int> getIntersectionCoordinates(cv::Mat &image);
     
 private:
     bool isRunning = false;
@@ -57,7 +57,7 @@ private:
     void countCoordinates(cv::Mat &printedFrame);
     void updateParameters(std::vector<double> vector);
     void countAngleDifference();
-    void normalizeCoordinates(double& x, double& y);
+    void normalizeCoordinates(double& x, double& y, cv::Mat frame);
     std::vector<double> countAverage(std::vector<std::vector<double>> &tempParameters);
     
     std::vector<double> findLinesParameters(cv::Mat frame);

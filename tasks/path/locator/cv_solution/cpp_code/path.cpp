@@ -8,7 +8,10 @@
 using namespace std;
 using namespace cv;
 
-PathDetector::PathDetector()
+PathDetector::PathDetector():
+actualParameters(4),
+angleDifference(2),
+logger(momentumPercent)
 {
 }
 
@@ -69,9 +72,9 @@ void PathDetector::run()
         
         countAngleDifference();
         
-        cout << "rotationAngle:" << getRotationAngle() << "\n";
+        //cout << "rotationAngle:" << getRotationAngle() << "\n";
         
-        getIntersectionCoordinates();
+        //getIntersectionCoordinates();
         
         printFrame(frame);
         
@@ -324,19 +327,35 @@ void PathDetector::countAngleDifference()
     }
 }
 
-int PathDetector::getRotationAngle()
+int PathDetector::getRotationAngle(cv::Mat &frame)
 {
+    vector<double> tempVector = findLinesParameters(frame);
+    
+    updateParameters(tempVector);
+    
+    printParameters("ActualAfter", actualParameters);
+    
+    countAngleDifference();
+    
+    printFrame(frame);
+    
     return abs(angleDifference[0]) < abs(angleDifference[1]) ? int(angleDifference[1]) : int(angleDifference[0]);
 }
 
-void PathDetector::normalizeCoordinates(double& x, double& y)
+void PathDetector::normalizeCoordinates(double& x, double& y, cv::Mat frame)
 {
     x = (x - (frame.size().width/2))/(frame.size().width/2);
     y = ((frame.size().height/2) - y)/(frame.size().height/2);
 }
 
-map<string,int> PathDetector::getIntersectionCoordinates()
+map<string,int> PathDetector::getIntersectionCoordinates(cv::Mat &frame)
 {
+    vector<double> tempVector = findLinesParameters(frame);
+    
+    updateParameters(tempVector);
+    
+    printParameters("ActualAfter", actualParameters);
+    
     /*
     A1*x + B1*y + C1 = 0, A2*x + B2*y + C2 = 0
     A = cosTheta, B = sinTheta, C = Rho
@@ -352,11 +371,10 @@ map<string,int> PathDetector::getIntersectionCoordinates()
     x = (sin(actualParameters[0]) * actualParameters[1] - sin(actualParameters[2])*actualParameters[3])/d;
     y = (cos(actualParameters[0])*actualParameters[3] - cos(actualParameters[2])*actualParameters[1])/d;
     
-    normalizeCoordinates(x, y);
+    normalizeCoordinates(x, y, frame);
     
-    cout << "X: " << x << endl;
-    cout << "Y: " << y << endl;
-    
+    printFrame(frame);
+
     coordinates["x"] = x;
     coordinates["y"] = y;
     

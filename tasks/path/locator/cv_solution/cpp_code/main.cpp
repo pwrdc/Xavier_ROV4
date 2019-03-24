@@ -2,11 +2,13 @@
 
 int main()
 {
-    const string video = "a.mp4";
-    const string image = "f.png";
+    const string pathVideo = "a.mp4";
+    const string pathImage = "f.png";
+    cv::Mat image = cv::imread(pathImage);
     
-    PathDetector detector{image};
-    detector.run();
+    PathDetector detector;
+    cout << detector.getRotationAngle(image) << endl;
+    detector.getIntersectionCoordinates(image);
     
     return 0;
 }
