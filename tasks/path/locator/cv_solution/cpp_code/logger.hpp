@@ -9,6 +9,7 @@
 #pragma once
 
 #include <fstream>
+#include <vector>
 
 using namespace std;
 

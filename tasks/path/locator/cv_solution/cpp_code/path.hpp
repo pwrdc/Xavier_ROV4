@@ -16,8 +16,8 @@ public:
     ~PathDetector();
     
     void run();
-    int getRotationAngle(cv::Mat &image);
-    map<string,int> getIntersectionCoordinates(cv::Mat &image);
+    int getRotationAngle(const cv::Mat& image);
+    map<string,double> getIntersectionCoordinates(const cv::Mat& image);
     
 private:
     bool isRunning = false;
@@ -45,7 +45,6 @@ private:
     std::vector<double> angleDifference;
     double momentumPercent = 0.4;
     cv::VideoCapture videoCap;
-    cv::Mat frame;
     cv::Mat image;
     Logger logger;
     
@@ -66,7 +65,7 @@ private:
     void assignLines(std::vector<cv::Vec2f> &lines, size_t &i, std::vector<std::vector<double>> &tempParameters);
     bool isFirstLine(std::vector<cv::Vec2f> &lines, const size_t &i);
     void assignFirstParameters(std::vector<double> & vector);
-    std::vector<cv::Vec2f> detectLines(cv::Mat &frame);
+    std::vector<cv::Vec2f> detectLines(cv::Mat frame);
     
     void prepareImage(cv::Mat &frame);
     void cannyEdges(cv::Mat &blurredImg);
