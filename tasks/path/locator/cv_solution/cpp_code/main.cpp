@@ -4,7 +4,7 @@
 int main()
 {
     const string pathVideo = "a.mp4";
-    const string pathImage = "f.png";
+    const string pathImage = "path1.png";
     cv::Mat image = cv::imread(pathImage);
     
     PathDetector detector; 

@@ -278,6 +278,10 @@ void PathDetector::countCoordinates(cv::Mat &printedFrame)
     pt2.x = cvRound(x0 - 1000 * -sin(actualParameters[2]));
     pt2.y = cvRound(y0 - 1000 * cos(actualParameters[2]));
     line(printedFrame, pt1, pt2, cv::Scalar(0, 0, 255), 3, CV_AA);
+    
+    
+    
+    imwrite("lines.png", printedFrame);
 }
 
 void PathDetector::countAngleDifference()
@@ -318,8 +322,8 @@ int PathDetector::getRotationAngle(const cv::Mat& frame)
 
 void PathDetector::normalizeCoordinates(double& x, double& y, cv::Mat frame)
 {
-    x = (x - (frame.size().width/2))/(frame.size().width/2);
-    y = ((frame.size().height/2) - y)/(frame.size().height/2);
+    x = (abs(x) - (frame.size().width/2))/(frame.size().width/2);
+    y = ((frame.size().height/2) - abs(y))/(frame.size().height/2);
 }
 
 map<string,double> PathDetector::getIntersectionCoordinates(const cv::Mat& frame)
@@ -335,15 +339,15 @@ map<string,double> PathDetector::getIntersectionCoordinates(const cv::Mat& frame
     A1*x + B1*y + C1 = 0, A2*x + B2*y + C2 = 0
     A = cosTheta, B = sinTheta, C = Rho
      
-    X = (B1 * C1 - B2 * C2) / D
+    X = (B1 * C2 - B2 * C1) / D
     Y = (A1 * C2 - A2 * C1) / D
-    where D = A1 * B2 - A2 * B2
+    where D = A1 * B2 - A2 * B1
     */
     map<string, double> coordinates;
     double d,x,y;
     
     d = cos(actualParameters[0])*sin(actualParameters[2]) - cos(actualParameters[2])*sin(actualParameters[0]);
-    x = (sin(actualParameters[0]) * actualParameters[1] - sin(actualParameters[2])*actualParameters[3])/d;
+    x = (sin(actualParameters[0]) * actualParameters[3] - sin(actualParameters[2])*actualParameters[1])/d;
     y = (cos(actualParameters[0])*actualParameters[3] - cos(actualParameters[2])*actualParameters[1])/d;
     
     normalizeCoordinates(x, y, cloned_frame);
