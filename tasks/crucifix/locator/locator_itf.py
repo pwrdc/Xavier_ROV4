@@ -1,16 +1,16 @@
 """
-File contains interface for locator class in gate
+File contains interface for locator class in crucifix task
 """
 import  abc
 
 class ILocator(metaclass=abc.ABCMeta):
     """
-    Interfce for gate locator
+    Interfce for crucifix task locator
     """
     @abc.abstractmethod
-    def get_gate_cordinates(self, image):
+    def get_intersection_coordinates(self, image):
         """
-        Method for geting cordinates of gate
+        Method for getting cordinates of cross intersection
         @param: image captured from camera, standard openCV type
         :return: dictionary with x,y cordinates of path in relative to centre of camera (0,0)
             values are floats in the range [-1, 1], where -1 is max left of max down cordinate,
