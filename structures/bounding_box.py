@@ -91,6 +91,9 @@ class BoundingBox:
         else:
             return BoundingBox(x, y, w, h)
 
+    def __str__(self):
+        return f"x={self.x}, y={self.y}, w={self.w}, h={self.h},"
+
 
 if __name__ == "__main__":
 
