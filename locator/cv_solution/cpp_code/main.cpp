@@ -5,11 +5,11 @@ using namespace cv;
 
 int main()
 {
-    const string pathImage = "";
+    const string pathImage = "green2.jpg";
     cv::Mat image = cv::imread(pathImage);
     
     PathDetector detector(pathImage);
-    detector.run();
+    detector.getIntersectionCoordinates(image);
 
     return 0;
 }

@@ -2,19 +2,20 @@
 
 #include <opencv2/opencv.hpp>
 #include <vector>
-#include "logger.hpp"
 #include <iostream>
 #include <map>
 
+using namespace std;
 
-class PathDetector
+class CrossDetector
 {
 public:
-    PathDetector();
-    PathDetector(std::string fileName);
-    ~PathDetector();
+    CrossDetector();
+    CrossDetector(std::string fileName);
+    ~CrossDetector();
     
     void run();
+    map<string,double> getIntersectionCoordinates(const cv::Mat& frame);
     
 private:
     
@@ -48,5 +49,6 @@ private:
     vector<double>checkIfPerpendicular(vector<vector<double>> &tempParameters);
     void countLinesCoordinates(cv::Mat &printedFrame);
     double countVectorAverage (vector<double> tempCoordinates, size_t size);
+    void normalizeCoordinates(double& x, double& y, cv::Mat frame);
 };
 

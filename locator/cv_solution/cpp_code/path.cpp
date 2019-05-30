@@ -7,11 +7,11 @@
 using namespace std;
 using namespace cv;
 
-PathDetector::PathDetector()
+CrossDetector::CrossDetector()
 {
 }
 
-PathDetector::PathDetector(string fileName)
+CrossDetector::CrossDetector(string fileName)
 {
     image = cv::imread(fileName);
     if (image.empty())
@@ -23,25 +23,25 @@ PathDetector::PathDetector(string fileName)
 }
         
         
-PathDetector::~PathDetector()
+CrossDetector::~CrossDetector()
 {
 
 }
 
-void PathDetector::run()
+void CrossDetector::run()
 {
     findLinesParameters(image);
     imshow("lines", image);
     waitKey(0);
 }
 
-void PathDetector::createControlWindow()
+void CrossDetector::createControlWindow()
 {
     cv::namedWindow("Control Window", WINDOW_NORMAL);
 }
 
 
-cv::Mat PathDetector::prepareImage(cv::Mat &frame)
+cv::Mat CrossDetector::prepareImage(cv::Mat &frame)
 {
     cv::cvtColor(frame, frame, COLOR_BGR2HSV);
     
@@ -58,7 +58,7 @@ cv::Mat PathDetector::prepareImage(cv::Mat &frame)
     return frame;
 }
 
-void PathDetector::cannyEdges(cv::Mat &blurredImg)
+void CrossDetector::cannyEdges(cv::Mat &blurredImg)
 {
     const int lowTreshCanny = 0;
     const int highTreshCanny = 255 * 2;
@@ -66,7 +66,7 @@ void PathDetector::cannyEdges(cv::Mat &blurredImg)
     Canny(blurredImg, blurredImg, lowTreshCanny, highTreshCanny, kernelSize);
 }
 
-void PathDetector::blurrImage(cv::Mat &imgThresholded)
+void CrossDetector::blurrImage(cv::Mat &imgThresholded)
 {
     const int kernelWidth = 9;
     const int kernelHeight = 9;
@@ -77,7 +77,7 @@ void PathDetector::blurrImage(cv::Mat &imgThresholded)
     cv::GaussianBlur(imgThresholded, imgThresholded, cv::Size(kernelWidth, kernelHeight), sigmaX, sigmaY);
 }
 
-void PathDetector::thresholdImage(cv::Mat &imgHSV)
+void CrossDetector::thresholdImage(cv::Mat &imgHSV)
 {
     const int lowTreshH = 35;
     const int lowTreshS = 0;
@@ -91,7 +91,7 @@ void PathDetector::thresholdImage(cv::Mat &imgHSV)
     bitwise_not(imgHSV, imgHSV);
 }
 
-void PathDetector::doMorphOperations(cv::Mat &imgThresholded)
+void CrossDetector::doMorphOperations(cv::Mat &imgThresholded)
 {
     const int kernelWidth = 3;
     const int kernelHeight = 3;
@@ -102,7 +102,7 @@ void PathDetector::doMorphOperations(cv::Mat &imgThresholded)
     erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(kernelWidth, kernelHeight)));
 }
 
-vector<cv::Vec2f> PathDetector::detectLines(cv::Mat &image)
+vector<cv::Vec2f> CrossDetector::detectLines(cv::Mat &image)
 {
     const int rho = 1; //The resolution of the parameter \rho in pixels
     const int tresh = 40; //The minimum number of intersections to “detect” a line
@@ -120,7 +120,7 @@ vector<cv::Vec2f> PathDetector::detectLines(cv::Mat &image)
     return lines;
 }
 
-void PathDetector::findLinesParameters(cv::Mat frame)
+void CrossDetector::findLinesParameters(cv::Mat frame)
 {
     vector<vector<double>> tempParameters;
     
@@ -139,7 +139,7 @@ void PathDetector::findLinesParameters(cv::Mat frame)
     countLinesCoordinates(frame);
 }
 
-vector<vector<double>> PathDetector::sortParameters(vector<cv::Vec2f> &lines)
+vector<vector<double>> CrossDetector::sortParameters(vector<cv::Vec2f> &lines)
 {
     vector<vector<double>> tempParameters;
     
@@ -152,7 +152,7 @@ vector<vector<double>> PathDetector::sortParameters(vector<cv::Vec2f> &lines)
     return tempParameters;
 }
 
-void PathDetector::isVertical(vector<cv::Vec2f> &lines, vector<vector<double>> &tempParameters)
+void CrossDetector::isVertical(vector<cv::Vec2f> &lines, vector<vector<double>> &tempParameters)
 {
     vector<vector<double>> vertical;
     double theta, rho;
@@ -191,7 +191,7 @@ void PathDetector::isVertical(vector<cv::Vec2f> &lines, vector<vector<double>> &
     tempParameters[tempParameters.size()-1].push_back(rho);
 }
 
-vector<double>PathDetector::checkIfPerpendicular(vector<vector<double>> &tempParameters)
+vector<double>CrossDetector::checkIfPerpendicular(vector<vector<double>> &tempParameters)
 {
     vector<vector<double>> perpendicularParams;
     vector<double> v1;
@@ -228,7 +228,7 @@ vector<double>PathDetector::checkIfPerpendicular(vector<vector<double>> &tempPar
 }
 
 
-vector<double>PathDetector::countVerticalAverage(vector<vector<double>> &tempParameters)
+vector<double>CrossDetector::countVerticalAverage(vector<vector<double>> &tempParameters)
 {
     vector<double> tempParams(2);
     double sumRho = 0;
@@ -249,7 +249,7 @@ vector<double>PathDetector::countVerticalAverage(vector<vector<double>> &tempPar
     return tempParams;
 }
 
-vector<double>PathDetector::countAverage(vector<vector<double>> &tempParameters)
+vector<double>CrossDetector::countAverage(vector<vector<double>> &tempParameters)
 {
     vector<double> tempParams(2);
     double sumRho = 0, sumTheta = 0;
@@ -278,7 +278,7 @@ vector<double>PathDetector::countAverage(vector<vector<double>> &tempParameters)
     return tempParams;
 }
 
-void PathDetector::countLinesCoordinates(cv::Mat &frame)
+void CrossDetector::countLinesCoordinates(cv::Mat &frame)
 {
     cv::Point pt1, pt2;
     double x0{ 0 }, y0{ 0 };
@@ -295,7 +295,37 @@ void PathDetector::countLinesCoordinates(cv::Mat &frame)
     }
 }
 
-double PathDetector::countVectorAverage (vector<double> tempCoordinates, size_t size)
+map<string,double> CrossDetector::getIntersectionCoordinates(const cv::Mat& frame)
+{
+    cv::Mat cloned_frame = frame.clone();
+    findLinesParameters(cloned_frame);
+    
+    //printParameters("ActualAfter", averageParameters);
+    
+    /*
+     A1*x + B1*y + C1 = 0, A2*x + B2*y + C2 = 0
+     A = cosTheta, B = sinTheta, C = Rho
+     
+     X = (B1 * C2 - B2 * C1) / D
+     Y = (A1 * C2 - A2 * C1) / D
+     where D = A1 * B2 - A2 * B1
+     */
+    map<string, double> coordinates;
+    double d,x,y;
+    
+    d = cos(averageParameters[0])*sin(averageParameters[2]) - cos(averageParameters[2])*sin(averageParameters[0]);
+    x = (sin(averageParameters[0]) * averageParameters[3] - sin(averageParameters[2])*averageParameters[1])/d;
+    y = (cos(averageParameters[0]) * averageParameters[3] - cos(averageParameters[2])*averageParameters[1])/d;
+    
+    normalizeCoordinates(x, y, cloned_frame);
+    
+    coordinates["x"] = x;
+    coordinates["y"] = y;
+
+    return coordinates;
+}
+
+double CrossDetector::countVectorAverage (vector<double> tempCoordinates, size_t size)
 {
     double sum = 0;
     for (int i = 0; i < size; i++)
@@ -304,5 +334,12 @@ double PathDetector::countVectorAverage (vector<double> tempCoordinates, size_t 
     }
     return sum/size;
 }
+
+void CrossDetector::normalizeCoordinates(double& x, double& y, cv::Mat frame)
+{
+    x = (abs(x) - (frame.size().width/2))/(frame.size().width/2);
+    y = ((frame.size().height/2) - abs(y))/(frame.size().height/2);
+}
+
 
 
