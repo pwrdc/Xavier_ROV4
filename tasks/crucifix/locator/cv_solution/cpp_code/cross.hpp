@@ -10,9 +10,7 @@ using namespace std;
 class CrossDetector
 {
 public:
-    CrossDetector();
     CrossDetector(std::string fileName);
-    ~CrossDetector();
     
     void run();
     map<string,double> getIntersectionCoordinates(const cv::Mat& frame);
@@ -32,8 +30,6 @@ private:
     //
     std::vector<double> averageParameters;
     
-    void createControlWindow();
-    
     cv::Mat prepareImage(cv::Mat &frame);
     void cannyEdges(cv::Mat &blurredImg);
     void blurrImage(cv::Mat &imgThresholded);
@@ -47,7 +43,6 @@ private:
     vector<double>countVerticalAverage(vector<vector<double>> &tempParameters);
     vector<double>countAverage(vector<vector<double>> &tempParameters);
     vector<double>checkIfPerpendicular(vector<vector<double>> &tempParameters);
-    void countLinesCoordinates(cv::Mat &printedFrame);
     double countVectorAverage (vector<double> tempCoordinates, size_t size);
     void normalizeCoordinates(double& x, double& y, cv::Mat frame);
 };

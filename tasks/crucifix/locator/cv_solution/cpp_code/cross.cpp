@@ -1,4 +1,4 @@
-#include "path.hpp"
+#include "cross.hpp"
 #include <iostream>
 #include <math.h>
 #include <numeric>
@@ -6,10 +6,6 @@
 
 using namespace std;
 using namespace cv;
-
-CrossDetector::CrossDetector()
-{
-}
 
 CrossDetector::CrossDetector(string fileName)
 {
@@ -21,12 +17,6 @@ CrossDetector::CrossDetector(string fileName)
         exit(-1);
     }
 }
-        
-        
-CrossDetector::~CrossDetector()
-{
-
-}
 
 void CrossDetector::run()
 {
@@ -34,12 +24,6 @@ void CrossDetector::run()
     imshow("lines", image);
     waitKey(0);
 }
-
-void CrossDetector::createControlWindow()
-{
-    cv::namedWindow("Control Window", WINDOW_NORMAL);
-}
-
 
 cv::Mat CrossDetector::prepareImage(cv::Mat &frame)
 {
@@ -52,8 +36,6 @@ cv::Mat CrossDetector::prepareImage(cv::Mat &frame)
     blurrImage(frame);
     
     cannyEdges(frame);
-    
-    imshow("canny", frame);
     
     return frame;
 }
@@ -72,7 +54,6 @@ void CrossDetector::blurrImage(cv::Mat &imgThresholded)
     const int kernelHeight = 9;
     const int sigmaX = 0; //The standard deviation in x
     const int sigmaY = 0; //The standard deviation in y
-    cv::Mat blurredImg;
     
     cv::GaussianBlur(imgThresholded, imgThresholded, cv::Size(kernelWidth, kernelHeight), sigmaX, sigmaY);
 }
@@ -135,8 +116,6 @@ void CrossDetector::findLinesParameters(cv::Mat frame)
     {
         cout << "No lines detected" << endl;
     }
-    
-    countLinesCoordinates(frame);
 }
 
 vector<vector<double>> CrossDetector::sortParameters(vector<cv::Vec2f> &lines)
@@ -145,7 +124,7 @@ vector<vector<double>> CrossDetector::sortParameters(vector<cv::Vec2f> &lines)
     
     vector<double> v1;
     tempParameters.push_back(v1);
-    tempParameters.push_back(v1);
+
     
     isVertical(lines, tempParameters);
     
@@ -163,7 +142,7 @@ void CrossDetector::isVertical(vector<cv::Vec2f> &lines, vector<vector<double>> 
     vertical.push_back(v1);
     nonVertical.push_back(v1);
     
-    for (size_t i = 0; i < lines.size(); i++)
+   for (size_t i = 0; i < lines.size(); i++)
     {
         if (sin(lines[i][1]) < 0.05)
         {
@@ -191,7 +170,7 @@ void CrossDetector::isVertical(vector<cv::Vec2f> &lines, vector<vector<double>> 
     tempParameters[tempParameters.size()-1].push_back(rho);
 }
 
-vector<double>CrossDetector::checkIfPerpendicular(vector<vector<double>> &tempParameters)
+vector<double> CrossDetector::checkIfPerpendicular(vector<vector<double>> &tempParameters)
 {
     vector<vector<double>> perpendicularParams;
     vector<double> v1;
@@ -228,7 +207,7 @@ vector<double>CrossDetector::checkIfPerpendicular(vector<vector<double>> &tempPa
 }
 
 
-vector<double>CrossDetector::countVerticalAverage(vector<vector<double>> &tempParameters)
+vector<double> CrossDetector::countVerticalAverage(vector<vector<double>> &tempParameters)
 {
     vector<double> tempParams(2);
     double sumRho = 0;
@@ -249,7 +228,7 @@ vector<double>CrossDetector::countVerticalAverage(vector<vector<double>> &tempPa
     return tempParams;
 }
 
-vector<double>CrossDetector::countAverage(vector<vector<double>> &tempParameters)
+vector<double> CrossDetector::countAverage(vector<vector<double>> &tempParameters)
 {
     vector<double> tempParams(2);
     double sumRho = 0, sumTheta = 0;
@@ -278,29 +257,11 @@ vector<double>CrossDetector::countAverage(vector<vector<double>> &tempParameters
     return tempParams;
 }
 
-void CrossDetector::countLinesCoordinates(cv::Mat &frame)
-{
-    cv::Point pt1, pt2;
-    double x0{ 0 }, y0{ 0 };
-    
-    for (int i = 0 ; i < averageParameters.size(); i+=2)
-    {
-        x0 = cos(averageParameters[i]) * averageParameters[i+1];
-        y0 = sin(averageParameters[i]) * averageParameters[i+1];
-        pt1.x = cvRound(x0 + 1000 * -sin(averageParameters[i]));
-        pt1.y = cvRound(y0 + 1000 * cos(averageParameters[i]));
-        pt2.x = cvRound(x0 - 1000 * -sin(averageParameters[i]));
-        pt2.y = cvRound(y0 - 1000 * cos(averageParameters[i]));
-        line(frame, pt1, pt2, cv::Scalar(0, 0, 255), 3);
-    }
-}
 
 map<string,double> CrossDetector::getIntersectionCoordinates(const cv::Mat& frame)
 {
     cv::Mat cloned_frame = frame.clone();
     findLinesParameters(cloned_frame);
-    
-    //printParameters("ActualAfter", averageParameters);
     
     /*
      A1*x + B1*y + C1 = 0, A2*x + B2*y + C2 = 0
@@ -321,6 +282,8 @@ map<string,double> CrossDetector::getIntersectionCoordinates(const cv::Mat& fram
     
     coordinates["x"] = x;
     coordinates["y"] = y;
+    
+    cout << x << " : " << y << endl;
 
     return coordinates;
 }
