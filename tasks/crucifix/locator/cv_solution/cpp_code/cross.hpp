@@ -14,8 +14,17 @@ public:
     
     void run();
     map<string,double> getIntersectionCoordinates(const cv::Mat& frame);
+    void setLowHSV(int H, int S, int V);
+    void setHighHSV(int H, int S, int V);
     
 private:
+    
+    int lowTreshH = 35;
+    int lowTreshS = 0;
+    int lowTreshV = 63;
+    int highTreshH = 75;
+    int highTreshS = 255;
+    int highTreshV = 110;
     
     cv::Mat image;
     //
@@ -43,7 +52,6 @@ private:
     vector<double>countVerticalAverage(vector<vector<double>> &tempParameters);
     vector<double>countAverage(vector<vector<double>> &tempParameters);
     vector<double>checkIfPerpendicular(vector<vector<double>> &tempParameters);
-    double countVectorAverage (vector<double> tempCoordinates, size_t size);
     void normalizeCoordinates(double& x, double& y, cv::Mat frame);
 };
 
