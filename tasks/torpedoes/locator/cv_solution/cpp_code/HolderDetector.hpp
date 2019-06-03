@@ -10,14 +10,20 @@
 class HolderDetector
 {
 public:
-    HolderDetector();
     HolderDetector(std::string fileName);
-    ~HolderDetector();
     
     void run();
     std::map<std::string, double> getLeverCoordinates(cv::Mat frame);
+    void setLowHSV(int H, int S, int V);
+    void setHighHSV(int H, int S, int V);
     
 private:
+    int lowTreshH = 75;
+    int lowTreshS = 0;
+    int lowTreshV = 118;
+    int highTreshH = 179;
+    int highTreshS = 255;
+    int highTreshV = 255;
     
     cv::Mat image;
     //

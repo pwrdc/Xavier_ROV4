@@ -7,10 +7,6 @@
 using namespace std;
 using namespace cv;
 
-HolderDetector::HolderDetector()
-{
-}
-
 HolderDetector::HolderDetector(string fileName)
 {
     image = cv::imread(fileName);
@@ -23,16 +19,24 @@ HolderDetector::HolderDetector(string fileName)
     }
 }
 
-
-HolderDetector::~HolderDetector()
-{
-    
-}
-
 void HolderDetector::run()
 {
     findLinesParameters(image);
     waitKey(0);
+}
+
+void HolderDetector::setLowHSV(int H, int S, int V)
+{
+    lowTreshH = H;
+    lowTreshS = S;
+    lowTreshV = V;
+}
+
+void HolderDetector::setHighHSV(int H, int S, int V)
+{
+    highTreshH = H;
+    highTreshS = S;
+    highTreshV = V;
 }
 
 void HolderDetector::createControlWindow()
@@ -81,13 +85,6 @@ void HolderDetector::blurrImage(cv::Mat &imgThresholded)
 
 void HolderDetector::thresholdImage(cv::Mat &imgHSV)
 {
-    const int lowTreshH = 75;
-    const int lowTreshS = 0;
-    const int lowTreshV = 118;
-    const int highTreshH = 179;
-    const int highTreshS = 255;
-    const int highTreshV = 255;
-    
     inRange(imgHSV, cv::Scalar(lowTreshH, lowTreshS, lowTreshV),
             cv::Scalar(highTreshH, highTreshS, highTreshV), imgHSV);
     bitwise_not(imgHSV, imgHSV);
@@ -152,6 +149,11 @@ map<string, double> HolderDetector::getLeverCoordinates(Mat frame)
     
     coordinates["x"] = x;
     coordinates["y"] = y;
+    
+    Point point(x,y);
+    drawMarker(image, point, 200);
+    imshow("swegewg", image);
+    waitKey(0);
     
     return coordinates;
 }
