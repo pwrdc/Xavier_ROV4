@@ -37,16 +37,6 @@ private:
     //  ...
     //
     std::vector<double> averageParameters;
-    
-    void createControlWindow();
-    
-    cv::Mat prepareImage(cv::Mat &frame);
-    void cannyEdges(cv::Mat &blurredImg);
-    void blurrImage(cv::Mat &imgThresholded);
-    void thresholdImage(cv::Mat &imgHSV);
-    void doMorphOperations(cv::Mat &imgThresholded);
-    
-    std::vector<cv::Vec4i> detectLines(cv::Mat &image);
     std::vector<cv::Vec4i> findLinesParameters(cv::Mat frame);
     
     void normalizeCoordinates(double& x, double& y, cv::Mat frame);

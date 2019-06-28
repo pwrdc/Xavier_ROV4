@@ -1,11 +1,15 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include "cross.hpp"
 #include <iostream>
 #include <math.h>
 #include <numeric>
-
+#include <execution>
+#include "imageProcessing.h"
 
 using namespace std;
 using namespace cv;
+using namespace image;
 
 CrossDetector::CrossDetector(string fileName)
 {
@@ -39,81 +43,11 @@ void CrossDetector::setHighHSV(int H, int S, int V)
     highTreshV = V;
 }
 
-cv::Mat CrossDetector::prepareImage(cv::Mat &frame)
-{
-    cv::cvtColor(frame, frame, COLOR_BGR2HSV);
-    
-    thresholdImage(frame);
-    
-    doMorphOperations(frame);
-    
-    blurrImage(frame);
-    
-    cannyEdges(frame);
-    
-    return frame;
-}
-
-void CrossDetector::cannyEdges(cv::Mat &blurredImg)
-{
-    const int lowTreshCanny = 0;
-    const int highTreshCanny = 255 * 2;
-    const int kernelSize = 7;
-    Canny(blurredImg, blurredImg, lowTreshCanny, highTreshCanny, kernelSize);
-}
-
-void CrossDetector::blurrImage(cv::Mat &imgThresholded)
-{
-    const int kernelWidth = 9;
-    const int kernelHeight = 9;
-    const int sigmaX = 0; //The standard deviation in x
-    const int sigmaY = 0; //The standard deviation in y
-    
-    cv::GaussianBlur(imgThresholded, imgThresholded, cv::Size(kernelWidth, kernelHeight), sigmaX, sigmaY);
-}
-
-void CrossDetector::thresholdImage(cv::Mat &imgHSV)
-{
-    
-    inRange(imgHSV, cv::Scalar(lowTreshH, lowTreshS, lowTreshV),
-            cv::Scalar(highTreshH, highTreshS, highTreshV), imgHSV);
-    bitwise_not(imgHSV, imgHSV);
-}
-
-void CrossDetector::doMorphOperations(cv::Mat &imgThresholded)
-{
-    const int kernelWidth = 3;
-    const int kernelHeight = 3;
-    
-    erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(kernelWidth, kernelHeight)));
-    dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(kernelWidth, kernelHeight)));
-    dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(kernelWidth, kernelHeight)));
-    erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(kernelWidth, kernelHeight)));
-}
-
-vector<cv::Vec2f> CrossDetector::detectLines(cv::Mat &image)
-{
-    const int rho = 1; //The resolution of the parameter \rho in pixels
-    const int tresh = 40; //The minimum number of intersections to “detect” a line
-    const int srn = 0, stn = 0; //Default parameters to zero
-    const double theta = CV_PI / 180; //The resolution of the parameter \theta in radians.
-    
-    vector<cv::Vec2f> lines;
-    
-    cv::Mat clonedImage = image.clone();
-    
-    cv:Mat cannyImg = prepareImage(clonedImage);
-    
-    HoughLines(cannyImg, lines, rho, theta, tresh, srn, stn);
-    
-    return lines;
-}
-
 void CrossDetector::findLinesParameters(cv::Mat frame)
 {
     vector<vector<double>> tempParameters;
     
-    vector<cv::Vec2f>lines = detectLines(frame);
+	vector<cv::Vec2f>lines = imageProcessing::detectLines(frame, lowTreshH, lowTreshS, lowTreshV, highTreshH, highTreshS, highTreshV);
     
     if (!lines.empty())
     {
@@ -126,20 +60,19 @@ void CrossDetector::findLinesParameters(cv::Mat frame)
     }
 }
 
-vector<vector<double>> CrossDetector::sortParameters(vector<cv::Vec2f> &lines)
+vector<vector<double>> CrossDetector::sortParameters(vector<cv::Vec2f> lines)
 {
     vector<vector<double>> tempParameters;
     
     vector<double> v1;
     tempParameters.push_back(v1);
-
     
     isVertical(lines, tempParameters);
     
     return tempParameters;
 }
 
-void CrossDetector::isVertical(vector<cv::Vec2f> &lines, vector<vector<double>> &tempParameters)
+void CrossDetector::isVertical(vector<cv::Vec2f> lines, vector<vector<double>> &tempParameters)
 {
     vector<vector<double>> vertical;
     double theta, rho;
@@ -150,7 +83,7 @@ void CrossDetector::isVertical(vector<cv::Vec2f> &lines, vector<vector<double>> 
     vertical.push_back(v1);
     nonVertical.push_back(v1);
     
-    for_each(lines.begin(), lines.end(), [&vertical, &nonVertical](cv::Vec2f x){
+    for_each(execution::par, lines.begin(), lines.end(), [&vertical, &nonVertical](cv::Vec2f x){
         vector<double> v1;
         if (sin(x[1]) < 0.05)
         {
@@ -189,7 +122,7 @@ vector<double> CrossDetector::checkIfPerpendicular(vector<vector<double>> &tempP
     
     vector<double> finalParams;
     
-    for_each(tempParameters.begin(), tempParameters.end()-2, [&perpendicularParams](vector<double> x){
+    for_each(execution::par, tempParameters.begin(), tempParameters.end()-2, [&perpendicularParams](vector<double> x){
         vector<double> v1;
         if(!x.empty())
         {
@@ -216,13 +149,13 @@ vector<double> CrossDetector::checkIfPerpendicular(vector<vector<double>> &tempP
 }
 
 
-vector<double> CrossDetector::countVerticalAverage(vector<vector<double>> &tempParameters)
+vector<double> CrossDetector::countVerticalAverage(vector<vector<double>> tempParameters)
 {
     vector<double> tempParams(2);
     double sumRho = 0;
     int counter = 0;
     
-    for_each(tempParameters.begin(), tempParameters.end()-1, [&sumRho, &counter](vector<double> x){
+    for_each(execution::par, tempParameters.begin(), tempParameters.end()-1, [&sumRho, &counter](vector<double> x){
         if(x[0])
         {
             sumRho += abs(x[1]);
@@ -236,13 +169,13 @@ vector<double> CrossDetector::countVerticalAverage(vector<vector<double>> &tempP
     return tempParams;
 }
 
-vector<double> CrossDetector::countAverage(vector<vector<double>> &tempParameters)
+vector<double> CrossDetector::countAverage(vector<vector<double>> tempParameters)
 {
     vector<double> tempParams(2);
     double sumRho = 0, sumTheta = 0;
     int counter = 0;
     
-    for_each(tempParameters.begin(), tempParameters.end()-1, [&sumTheta, &counter](vector<double> x){
+    for_each(execution::par, tempParameters.begin(), tempParameters.end()-1, [&sumTheta, &counter](vector<double> x){
         if(x[0])
         {
             sumTheta += abs(x[0]);
@@ -250,7 +183,7 @@ vector<double> CrossDetector::countAverage(vector<vector<double>> &tempParameter
         }
     });
     
-    for_each(tempParameters.begin(), tempParameters.end()-1, [&sumRho](vector<double> x){
+    for_each(execution::par, tempParameters.begin(), tempParameters.end()-1, [&sumRho](vector<double> x){
         if(x[0])
         {
             sumRho += abs(x[1]);
@@ -283,7 +216,7 @@ map<string,double> CrossDetector::getIntersectionCoordinates(const cv::Mat& fram
     d = cos(averageParameters[0])*sin(averageParameters[2]) - cos(averageParameters[2])*sin(averageParameters[0]);
     x = (sin(averageParameters[0]) * averageParameters[3] - sin(averageParameters[2])*averageParameters[1])/d;
     y = (cos(averageParameters[0]) * averageParameters[3] - cos(averageParameters[2])*averageParameters[1])/d;
-    
+	
     normalizeCoordinates(x, y, cloned_frame);
     
     coordinates["x"] = x;
