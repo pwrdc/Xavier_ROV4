@@ -54,3 +54,14 @@ class ILocator(metaclass=abc.ABCMeta):
             example: {"x":0.4, "y":0.5}
         """
         pass
+
+    @abc.abstractmethod
+    def get_vampire_angle(self, image):
+        """
+        Return an angle of rotation to turn so that the angle between the violet tube's axis and the ROV vector is 0
+        Vector of ROV indicates straight ahead
+        @param: image captured from camera, standard openCV type
+        :return: one int value in range of (-180,180], which is an angle of rotation
+            where 0 : in front of, -90 : left, 90 : right etc.
+        """
+        pass
