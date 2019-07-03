@@ -9,8 +9,52 @@ class TaskExecutor(task_executor_itf.ITaskExecutor):
         pass
 
 
+class BaseTask:
+    """
+    szablon klasy dla kontrolera zadania
+    """
 
+    def __init__(self, communication_interface, task_name, task_id, interval, image_size, debug):
+        self.com_interface = communication_interface
+        self.task_name = task_name
+        self.task_id = task_id
+        self.interval = interval
+        self.image_size = image_size
+        self.debug = debug
+        if self.debug:
+            print("Start zadania: {name}-{id}".format(name=self.task_name, id=self.task_id))
 
+    def run(self):
+        """
+        wykonywanie zadania
+        :return: czy zadanie zostalo wykonane poprawnie
+        """
+        return False
+
+    def send_task_info(self):
+        """
+        wysyla dane o zadaniu do Jetsona
+        """
+        self.com_interface.send_vision({'task_name': self.task_name, 'task_id': self.task_id})
+        correct = False
+        while not correct:
+            try:
+                if self.debug:
+                    print('Czekam na Jetsona')
+                if self.com_interface.get_vision()['init']:
+                    correct = True
+                else:
+                    time.sleep(1)
+            except (TypeError, KeyError):
+                if self.debug:
+                    print('Blad pobierania danych')
+                time.sleep(1)
+
+    def update_data(self):
+pass
+
+    
+    
 
 
 
