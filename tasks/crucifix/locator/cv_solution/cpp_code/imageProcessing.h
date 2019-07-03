@@ -18,7 +18,7 @@ namespace image
 
 	public:
 		static __declspec(dllexport) vector<cv::Vec2f> detectLines(cv::Mat &image, int lTH, int lTS, int lTV, int hTH, int hTS, int hTV);
-		static __declspec(dllexport) vector<cv::Vec4i> detectLinesP(cv::Mat &image, int lTH, int lTS, int lTV, int hTH, int hTS, int hTV);
+		static __declspec(dllexport) vector<cv::Vec4i> detectLinesP(cv::Mat &image, int lTH, int lTS, int lTV, int hTH, int hTS, int hTV, int minLineLength);
 	};
 
 }

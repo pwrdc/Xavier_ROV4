@@ -24,6 +24,7 @@ private:
     int highTreshH = 179;
     int highTreshS = 255;
     int highTreshV = 255;
+    int minLineLength = 50;
     
     cv::Mat image;
     //

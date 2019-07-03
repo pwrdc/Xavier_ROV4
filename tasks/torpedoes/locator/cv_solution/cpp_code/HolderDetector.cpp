@@ -43,7 +43,7 @@ void HolderDetector::setHighHSV(int H, int S, int V)
 
 vector<cv::Vec4i> HolderDetector::findLinesParameters(cv::Mat frame)
 {
-    vector<cv::Vec4i>lines = imageProcessing::detectLinesP(frame, lowTreshH, lowTreshS, lowTreshV, highTreshH, highTreshS, highTreshV);
+    vector<cv::Vec4i>lines = imageProcessing::detectLinesP(frame, lowTreshH, lowTreshS, lowTreshV, highTreshH, highTreshS, highTreshV, minLineLength);
     return lines;
 }
 
