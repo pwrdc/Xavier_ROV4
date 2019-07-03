@@ -1,0 +1,49 @@
+from utils.project_managment import PROJECT_ROOT
+from subprocess import Popen
+from typing import Optional
+
+
+class PythonSubtask:
+    def __init__(self, path: str):
+        """
+        :param path: Path to python script that is run, relative to project root
+        """
+        path = path.replace("/", ".").replace(".py", "")
+
+        self.path = path
+        self.process: Optional[Popen] = None
+
+    def start(self, arguments: str = ""):
+        """
+        Starts a python subtask
+        :param arguments: Arguments provided to the running script
+        :return: None
+        """
+        print(PROJECT_ROOT)
+        if self.process is None:
+            self.process = Popen(["python3", "-m", self.path, *arguments.split(" ")], cwd=PROJECT_ROOT)
+
+    def kill(self):
+        """
+        Kills running subtask
+        :return: None
+        """
+        if self.process is not None:
+            self.process.kill()
+            self.process = None
+
+    @staticmethod
+    def run(path: str, arguments: str): # -> PythonSubtask
+        """
+        Factory method for creating and starting a python subtask
+        :param path: Path to python script that is run, relative to project root
+        :param arguments: arguments provided to python script
+        :return: PythonSubtask class with task already started
+        """
+        task = PythonSubtask(path)
+        task.start(arguments)
+
+        return task
+
+    def __del__(self):
+        self.kill()
