@@ -51,7 +51,7 @@ class BaseTask:
                 time.sleep(1)
 
     def update_data(self):
-pass
+        pass
 
     
     
