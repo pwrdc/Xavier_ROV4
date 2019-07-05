@@ -17,11 +17,11 @@ public:
     void setHighHSV(int H, int S, int V);
     
 private:
-    int lowTreshH = 0;
-    int lowTreshS = 0;
+    int lowTreshH = 61;
+    int lowTreshS = 100;
     int lowTreshV = 0;
-    int highTreshH = 134;
-    int highTreshS = 195;
+    int highTreshH = 154;
+    int highTreshS = 196;
     int highTreshV = 255;
 	int minLineLength = 30;
     
