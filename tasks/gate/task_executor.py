@@ -2,9 +2,13 @@ from .. import task_executor_itf
 import numpy as np
 import time
 
+
 class TaskExecutor(task_executor_itf.ITaskExecutor):
+
     def __init__(self):
+        super().__init__()
         pass
+
     def run(self):
         pass
 
@@ -14,8 +18,8 @@ class BaseTask:
     szablon klasy dla kontrolera zadania
     """
 
-    def __init__(self, communication_interface, task_name, task_id, interval, image_size, debug):
-        self.com_interface = communication_interface
+    def __init__(self, movements, task_name, task_id, interval, image_size, debug):
+        self.movements = movements
         self.task_name = task_name
         self.task_id = task_id
         self.interval = interval
@@ -35,37 +39,45 @@ class BaseTask:
         """
         wysyla dane o zadaniu do Jetsona
         """
-        self.com_interface.send_vision({'task_name': self.task_name, 'task_id': self.task_id})
-        correct = False
-        while not correct:
-            try:
-                if self.debug:
-                    print('Czekam na Jetsona')
-                if self.com_interface.get_vision()['init']:
-                    correct = True
-                else:
-                    time.sleep(1)
-            except (TypeError, KeyError):
-                if self.debug:
-                    print('Blad pobierania danych')
-                time.sleep(1)
+        print('task_name: ' + self.task_name + ' task_id: ' + self.task_id)
 
     def update_data(self):
         pass
 
     
-    
+class BoundingBox:
+    '''
+    Trzeba uzupełnić implementację
+
+    '''
+    def _init_(self):
+        pass
+
+    def get_vision(self):
+        gate_detected = False
+        gate_y = int()
+        gate_z = int()
+        crossbar_slope = float()
+        height_correct = False
+        return_dict = {'gate_detected': gate_detected, 'gate_y': gate_y, 'gate_z': gate_z,
+                       'crossbar_slope': crossbar_slope, 'height_correct': height_correct}
+        return return_dict
+
+    def get_sensors(self):
+        depth = float()
+        imuYaw = float()
+        return_dict = {'depth': depth, 'imuYaw': imuYaw}
+        return return_dict
 
 
-
-class GateFinder():
+class GateFinder(BaseTask):
     """
     klasa zadania znalezienia bramki na obrazie
     """
 
-    def __init__(self, communication_interface, v_z=80, v_r=15, rotate_left=False, depth_thresh=2, n_trials=5,
+    def __init__(self, movements, bounding_box, v_z=80, v_r=15, rotate_left=False, depth_thresh=2, n_trials=5,
                  interval=0.1, image_size=(1280, 720), debug=False):
-        super().__init__(communication_interface=communication_interface, task_name='gate', task_id=1,
+        super().__init__(movements=movements, task_name='gate', task_id=1,
                          interval=interval, image_size=image_size, debug=debug)
         self.rotate_left = rotate_left
         self.v_z = -v_z
@@ -79,6 +91,7 @@ class GateFinder():
         self.current_orientation = 0
         self.start_orientation = 0
         self.height_correct = False
+        self.bounding_box = bounding_box
 
     def run(self):
         """
@@ -99,10 +112,10 @@ class GateFinder():
                     if self.debug:
                         print('Podplywam')
                     self.update_data()
-                    self.com_interface.send_control({'setVx': self.v_z})
+                    self.movements.set_lin_velocity(front=self.v_z, right=0, up=0)
                     if not self.gate_detected:
                         break
-                self.com_interface.send_control({'setVx': 0})
+                self.movements.set_lin_velocity(front=0, right=0, up=0)
                 if self.gate_detected:
                     return True
             else:
@@ -122,17 +135,17 @@ class GateFinder():
             print("{name}-{id}: szukam bramki".format(name=self.task_name, id=self.task_id))
         half_rotated = False
         while True:
-            self.com_interface.send_control({'setAngularV': self.v_r})
+            self.movements.set_ang_velocity(yaw=self.v_r, roll=0, pitch=0)
             time.sleep(self.interval)
             self.update_data()
             if self.gate_detected:
-                self.com_interface.send_control({'setAngularV': 0})
+                self.movements.set_ang_velocity(yaw=0, roll=0, pitch=0)
                 return True
             else:
                 if 170 < self.current_orientation < 190:
                     half_rotated = True
                 if half_rotated and (self.current_orientation > 350 or self.current_orientation < 10):
-                    self.com_interface.send_control({'setAngularV': 0})
+                    self.movements.set_ang_velocity(yaw=0, roll=0, pitch=0)
                     return False
 
     def drop(self):
@@ -143,22 +156,24 @@ class GateFinder():
             print("{name}-{id}: zanurzam".format(name=self.task_name, id=self.task_id))
         start_time = time.time()
         while time.time() - start_time < self.depth_threshold:
-            self.com_interface.send_control({'setVz': self.v_z})
+            self.movements.set_lin_velocity(front=0, up=self.v_z, right=0)
             time.sleep(self.interval)
             self.update_data()
-        self.com_interface.send_control({'setVz': 0})
+            self.movements.set_lin_velocity(front=0, up=0, right=0)
         self.last_depth = self.current_depth
 
     def update_data(self):
         correct = False
         while not correct:
             try:
-                self.current_depth = self.com_interface.get_sensors()['depth']
+                sensor_dict = self.bounding_box.get_sensors()
+                self.current_depth = sensor_dict['depth']
                 # okresl bezwzgledna wartosc orientacji
-                cur_orientation = self.com_interface.get_sensors()['imuYaw']
+                cur_orientation = sensor_dict['imuYaw']
                 self.current_orientation = (cur_orientation - self.start_orientation) % 360
-                self.gate_detected = self.com_interface.get_vision()['gate_detected']
-                self.height_correct = self.com_interface.get_vision()['height_correct']
+                vision_dict = self.bounding_box.get_vision()
+                self.gate_detected = vision_dict['gate_detected']
+                self.height_correct = vision_dict['height_correct']
                 correct = True
             except (TypeError, KeyError):
                 print('     Odebrano bledne dane')
@@ -166,21 +181,15 @@ class GateFinder():
                 pass
 
 
-
-
-
-
-
-
-class GateAligner():
+class GateAligner(BaseTask):
     """
     klasa ustawienia łodzi na wprost bramki
     """
 
-    def __init__(self, communication_interface, v=50, y_target=640, z_target=200, y_margin=20, z_margin=20,
+    def __init__(self, movements, bounding_box, v=50, y_target=640, z_target=200, y_margin=20, z_margin=20,
                  slope_margin=0.1, fix_thresh=1., recovery_thresh=5., interval=0.1, image_size=(1280, 720),
                  debug=False):
-        super().__init__(communication_interface=communication_interface, task_name='gate', task_id=2,
+        super().__init__(movements=movements, task_name='gate', task_id=2,
                          interval=interval, image_size=image_size, debug=debug)
         self.v_def = v
         self.y_target = y_target
@@ -196,6 +205,7 @@ class GateAligner():
         self.gate_z = 0
         self.crossbar_slope = 0.
         self.time_not_detected = 0.
+        self.bounding_box = bounding_box
 
     def run(self):
         """
@@ -215,16 +225,16 @@ class GateAligner():
                 # jezeli nie uda sie poprawic - porazka
                 if self.debug:
                     print('Powrot do GateFinder')
-                return [GateFinder(self.com_interface, debug=self.debug)]
+                return [GateFinder(bounding_box=self.bounding_box, movements=self.movements, debug=self.debug)]
         # dopasuj pozycje
-        if self.align_position():
+        if self.align_position:
             # jezeli uda się - sukces
             return True
         else:
             # jezeli sie nie uda - porazka
             if self.debug:
                 print('Powrot do GateFinder')
-            return [GateFinder(self.com_interface, debug=self.debug)]
+            return [GateFinder(bounding_box=self.bounding_box, movements=self.movements, debug=self.debug)]
 
     def align_angle(self):
         """
@@ -237,7 +247,7 @@ class GateAligner():
         # dopoki nachylenie poprzeczki nie jest wewnatrz przedzialu
         while not -self.slope_margin < self.crossbar_slope < self.slope_margin:
             # obracaj lodz w odpowiednim kierunku
-            self.com_interface.send_control({'setAngularV': int(np.sign(self.crossbar_slope) * 15)})
+            self.movements.set_ang_velocity(yaw=int(np.sign(self.crossbar_slope) * 15), roll=0, pitch=0)
             # czekaj
             time.sleep(self.interval)
             # aktualizuj dane
@@ -248,12 +258,12 @@ class GateAligner():
                 self.time_not_detected += self.interval
                 # prog
                 if self.time_not_detected > self.fix_thresh:
-                    self.com_interface.send_control({'setAngularV': 0})
+                    self.movements.set_ang_velocity(yaw=0, roll=0, pitch=0)
                     return False
             elif self.time_not_detected > 0:
                 self.time_not_detected = 0.
         # zakoncz obrot
-        self.com_interface.send_control({'setAngularV': 0})
+        self.movements.set_ang_velocity(yaw=0, roll=0, pitch=0)
         return True
 
     def fix(self):
@@ -276,13 +286,13 @@ class GateAligner():
             recovered = correct_y and correct_z
             # wyslij polecenie ruchu do lodzi
             if correct_y:
-                self.com_interface.send_control({'setVy': 0})
+                self.movements.set_lin_velocity(right=0)
             else:
-                self.com_interface.send_control({'setVy': int(side_y * self.v_def)})
+                self.movements.set_lin_velocity(right=int(side_y * self.v_def))
             if correct_z:
-                self.com_interface.send_control({'setVz': 0})
+                self.movements.set_lin_velocity(up=0)
             else:
-                self.com_interface.send_control({'setVz': int(side_z * self.v_def)})
+                self.movements.set_lin_velocity(up=int(side_z * self.v_def))
             # czekaj
             time.sleep(self.interval)
             # aktualizuj dane
@@ -291,14 +301,15 @@ class GateAligner():
             if not self.gate_detected:
                 self.time_not_detected += self.interval
                 if self.time_not_detected > self.recovery_thresh:
-                    self.com_interface.send_control({'setVy': 0, 'setVz': 0})
+                    self.movements.set_lin_velocity(right=0, up=0)
                     return False
             elif self.time_not_detected > 0:
                 self.time_not_detected = 0.
         # zatrzymaj lodz
-        self.com_interface.send_control({'setVy': 0, 'setVz': 0})
+        self.movements.set_lin_velocity(right=0, up=0)
         return True
 
+    @property
     def align_position(self):
         """
         dopasowanie polozenia lodzi
@@ -325,13 +336,13 @@ class GateAligner():
             aligned = aligned_y and aligned_z
             # wyslij polecenie ruchu do lodzi
             if aligned_y:
-                self.com_interface.send_control({'setVy': 0})
+                self.movements.set_lin_velocity(right=0)
             else:
-                self.com_interface.send_control({'setVy': int(side_y * self.v_def)})
+                self.movements.set_lin_velocity(right=int(side_y * self.v_def))
             if aligned_z:
-                self.com_interface.send_control({'setVz': 0})
+                self.movements.set_lin_velocity(up=0)
             else:
-                self.com_interface.send_control({'setVz': int(side_z * self.v_def)})
+                self.movements.set_lin_velocity(up=int(side_z * self.v_def))
             # czekaj
             time.sleep(self.interval)
             # aktualizuj dane
@@ -339,30 +350,31 @@ class GateAligner():
             if not self.gate_detected:
                 self.time_not_detected += self.interval
                 if self.time_not_detected > self.fix_thresh:
-                    self.com_interface.send_control({'setVy': 0, 'setVz': 0})
+                    self.movements.set_lin_velocity(right=0, up=0)
                     return False
             elif self.time_not_detected > 0:
                 self.time_not_detected = 0.
         # zatrzymaj lodz
-        self.com_interface.send_control({'setVy': 0, 'setVz': 0})
+        self.movements.set_lin_velocity(right=0, up=0)
         # jezeli bardzo odchyli sie od docelowej pozycji
         if abs(self.crossbar_slope) > 1.5 * self.slope_margin:
             if self.align_angle():
                 return True
             else:
                 # ponowne dopasowanie pozycji
-                return self.align_position()
+                return self.align_position
         return True
 
     def update_data(self):
         correct = False
         while not correct:
             try:
-                self.gate_detected = self.com_interface.get_vision()['gate_detected']
+                vision_dict = self.bounding_box.get_vision()
+                self.gate_detected = vision_dict['gate_detected']
                 if self.gate_detected:
-                    self.gate_y = self.com_interface.get_vision()['gate_y']
-                    self.gate_z = self.com_interface.get_vision()['gate_z']
-                    self.crossbar_slope = self.com_interface.get_vision()['crossbar_slope']
+                    self.gate_y = vision_dict['gate_y']
+                    self.gate_z = vision_dict['gate_z']
+                    self.crossbar_slope = vision_dict['crossbar_slope']
                 correct = True
             except (TypeError, KeyError):
                 print('     Odebrano bledne dane')
@@ -371,10 +383,11 @@ class GateAligner():
 
 
 class GateDriver(BaseTask):
-    def __init__(self, communication_interface, v_x=80, y_margin=20, z_margin=20, slope_margin=0.3,
+    def __init__(self, bounding_box, movements, v_x=80, y_margin=20, z_margin=20, slope_margin=0.3,
                  disappear_thresh=0.5, wait_time=5., err_thresh=1., interval=0.1, image_size=(1280, 720), debug=False):
-        super().__init__(communication_interface=communication_interface, task_name='gate', task_id=2,
+        super().__init__(movements=movements, task_name='gate', task_id=2,
                          interval=interval, image_size=image_size, debug=debug)
+
         self.v_x = v_x
         self.y_margin = y_margin
         self.z_margin = z_margin
@@ -389,6 +402,7 @@ class GateDriver(BaseTask):
         self.crossbar_slope = 0
         self.err_time = 0.
         self.time_not_detected = 0.
+        self.bounding_box = bounding_box
 
     def run(self):
         # wyslij informacje o zadaniu do Jetsona
@@ -399,7 +413,7 @@ class GateDriver(BaseTask):
             print("{name}-{id}: plyne przez bramke".format(name=self.task_name, id=self.task_id))
         while True:
             # plyn do przodu
-            self.com_interface.send_control({'setVx': self.v_x})
+            self.movements.set_lin_velocity(front=self.v_x, right=0, up=0)
             # czekaj
             time.sleep(self.interval)
             # aktualizuj dane
@@ -410,7 +424,7 @@ class GateDriver(BaseTask):
                 if self.err_time > self.err_thresh:
                     if self.debug:
                         print('Powrot do GateAligner')
-                    return [GateAligner(self.com_interface, debug=self.debug)]
+                    return [GateAligner(movements=self.movements, bounding_box=self.bounding_box, debug=self.debug)]
             elif self.err_time > 0:
                 self.err_time = 0.
             # zgubiono bramke
@@ -419,7 +433,7 @@ class GateDriver(BaseTask):
                 if self.time_not_detected > self.disappear_thresh:
                     # plyn dalej przez bramke
                     time.sleep(self.wait_time)
-                    self.com_interface.send_control({'setVx': 0})
+                    self.movements.set_lin_velocity(front=0, right=0, up=0)
                     return True
             elif self.time_not_detected > 0:
                 self.time_not_detected = 0.
@@ -428,11 +442,12 @@ class GateDriver(BaseTask):
         correct = False
         while not correct:
             try:
-                self.gate_detected = self.com_interface.get_vision()['gate_detected']
+                vision_dict = self.bounding_box.get_vision()
+                self.gate_detected = vision_dict['gate_detected']
                 if self.gate_detected:
-                    self.gate_y = self.com_interface.get_vision()['gate_y']
-                    self.gate_z = self.com_interface.get_vision()['gate_z']
-                    self.crossbar_slope = self.com_interface.get_vision()['crossbar_slope']
+                    self.gate_y = vision_dict['gate_y']
+                    self.gate_z = vision_dict['gate_z']
+                    self.crossbar_slope = vision_dict['crossbar_slope']
                 correct = True
             except (TypeError, KeyError):
                 print('     Odebrano bledne dane')
