@@ -21,6 +21,8 @@ class ITaskExecutor(metaclass=abc.ABCMeta):
             keywords: arm_camera; bottom_camera; front_cam1;
             for cameras objects look at /vision/front_cam_1.py
         """
+        self.movement_object = movement_object
+        self.cameras_dict = cameras_dict
         pass
 
     @abc.abstractmethod

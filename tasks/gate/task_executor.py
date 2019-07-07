@@ -5,12 +5,46 @@ import time
 
 class TaskExecutor(task_executor_itf.ITaskExecutor):
 
-    def __init__(self):
-        super().__init__()
-        pass
+    def __init__(self,movement_object,cameras_dict,locator):
+        super().__init__(movement_object, cameras_dict)
+        self.bounding_box = BoundingBox(cameras_dict, locator)
+        self.gate_finder = GateFinder(movements=self.movement_object,bounding_box=self.bounding_box)
+        self.gate_aligner = GateAligner(movements=self.movement_object,bounding_box=self.bounding_box)
+        self.gate_driver = GateDriver(movements=self.movement_object,bounding_box=self.bounding_box)
+
 
     def run(self):
+        if self.gate_finder.run(): #jeśli znajdzie bramkę
+                if self.gate_aligner.run(): #jeśli się do niej dopasuje
+                    self.gate_driver.run() #niech płynie do niej
+                    #sukces zwraca true, jak ją zgubi to zwróci false
+        else:
+            return False
+
+
+class BoundingBox:
+    '''
+    Trzeba uzupełnić implementację
+
+    '''
+    def _init_(self,cameras_dict,locator):
         pass
+
+    def get_vision(self):
+        gate_detected = False
+        gate_y = int()
+        gate_z = int()
+        crossbar_slope = float()
+        height_correct = False
+        return_dict = {'gate_detected': gate_detected, 'gate_y': gate_y, 'gate_z': gate_z,
+                       'crossbar_slope': crossbar_slope, 'height_correct': height_correct}
+        return return_dict
+
+    def get_sensors(self):
+        depth = float()
+        imu_yaw = float()
+        return_dict = {'depth': depth, 'imuYaw': imu_yaw}
+        return return_dict
 
 
 class BaseTask:
@@ -45,29 +79,6 @@ class BaseTask:
         pass
 
     
-class BoundingBox:
-    '''
-    Trzeba uzupełnić implementację
-
-    '''
-    def _init_(self):
-        pass
-
-    def get_vision(self):
-        gate_detected = False
-        gate_y = int()
-        gate_z = int()
-        crossbar_slope = float()
-        height_correct = False
-        return_dict = {'gate_detected': gate_detected, 'gate_y': gate_y, 'gate_z': gate_z,
-                       'crossbar_slope': crossbar_slope, 'height_correct': height_correct}
-        return return_dict
-
-    def get_sensors(self):
-        depth = float()
-        imuYaw = float()
-        return_dict = {'depth': depth, 'imuYaw': imuYaw}
-        return return_dict
 
 
 class GateFinder(BaseTask):
