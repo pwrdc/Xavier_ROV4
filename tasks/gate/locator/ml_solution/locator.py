@@ -1,13 +1,10 @@
-"""
-File contains interface for locator class in gate
-"""
-import  abc
+from tasks.gate.locator.locator_itf import ILocator
 
-class ILocator(metaclass=abc.ABCMeta):
+class Locator(ILocator):
     """
-    Interfce for gate locator
+    gate locator
     """
-    @abc.abstractmethod
+
     def get_gate_cordinates(self, image):
         """
         Method for geting cordinates of gate
