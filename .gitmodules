@@ -1,0 +1,3 @@
+[submodule "communication/pytransdec"]
+	path = communication/pytransdec
+	url = https://github.com/PiotrJZielinski/PyTransdec.git
