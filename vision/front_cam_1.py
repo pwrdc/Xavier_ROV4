@@ -18,6 +18,7 @@ class FrontCamera1(IBaseCamera):
             self.get_img_ref = self.get_simulation_image
         elif mode == 'HARDWARE':
             self.cap = cv2.VideoCapture(CAMERAS.FRONT_CAM_1_NR)
+            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1);
         elif mode == "ROV3":
             # use xiaomi wifi camera
             #TODO
