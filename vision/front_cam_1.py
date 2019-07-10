@@ -20,15 +20,23 @@ class FrontCamera1(IBaseCamera):
             self.cap = cv2.VideoCapture(CAMERAS.FRONT_CAM_1_NR)
             self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1);
         elif mode == "ROV3":
-            # use xiaomi wifi camera
-            #TODO
-            pass
+            self.cap = cv2.VideoCapture(CAMERAS.XIAOMI_CAMERA_SOURCE)
+            self.frame_width = int(self.cap.get(3))
+            self.frame_height = int(self.cap.get(4))
+
+
+    def update_xiaomi_camera(self):
+        # Read the next frame from the stream in a different thread
+        while True:
+            if self.cap.isOpened():
+                (self.status, self.frame) = self.cap.read()
 
     def get_image(self):
         '''
-        :return: the latest image captured from camera, standard openCV type
+        :return: the latest image capd from camera, standard openCV type
         '''
-        return self.get_img_ref()
+        _, frame = self.cap.read()
+        return frame 
 
     def get_simulation_image(self):
         self.simulation_ref.set_camera_focus(0)
@@ -37,3 +45,9 @@ class FrontCamera1(IBaseCamera):
     def get_hardware_image(self):
         _, frame = self.cap.read()
         return cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+if __name__ == '__main__':
+    cam = FrontCamera1(mode = "ROV3")
+
+    while True:
+        frame = cam.get_image()
+        cv2.imshow('frame', frame)
