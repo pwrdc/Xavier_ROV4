@@ -1,6 +1,6 @@
 from vision.base_camera_itf import IBaseCamera
 
-class GrasperCamera(IBaseCamera):
+class ArmCamera(IBaseCamera):
     '''
     Camera positioned at the front of AUV
     '''
