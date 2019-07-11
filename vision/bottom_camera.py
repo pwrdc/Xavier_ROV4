@@ -1,4 +1,7 @@
+import cv2
 from vision.base_camera_itf import IBaseCamera
+from definitions import CAMERAS
+
 
 class BottomCamera(IBaseCamera):
     '''
@@ -16,11 +19,10 @@ class BottomCamera(IBaseCamera):
             self.get_img_ref = self.get_simulation_image
         elif mode == 'HARDWARE':
             self.cap = cv2.VideoCapture(CAMERAS.BOTTOM_CAMERA_NR)
-			self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1);
+            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         elif mode == "ROV3":
-            # use xiaomi wifi camera
-            #TODO
-            pass
+            self.get_img_ref = self.get_xiaomi_image
+
     def get_image(self):
         '''
         :return: the latest image captured from camera, standard openCV type
@@ -28,9 +30,12 @@ class BottomCamera(IBaseCamera):
         return self.get_img_ref()
 
     def get_simulation_image(self):
-        self.simulation_ref.set_camera_focus(1)
+        self.simulation_ref.set_camera_focus(CAMERAS.SIM_BOTTOM_CAM_ID)
         return self.simulation_ref.get_image()
 
     def get_hardware_image(self):
         _, frame = self.cap.read()
         return cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
+    def get_xiaomi_image(self):
+        raise Exception("Bottom camera not implemented in ROV3")

@@ -1,5 +1,7 @@
 import cv2
 from vision.base_camera_itf import IBaseCamera
+from definitions import CAMERAS
+
 
 class BumperCamRight(IBaseCamera):
     '''
@@ -17,11 +19,9 @@ class BumperCamRight(IBaseCamera):
             self.get_img_ref = self.get_simulation_image
         elif mode == 'HARDWARE':
             self.cap = cv2.VideoCapture(CAMERAS.BUMBER_CAMERA_RIGHT_NR)
-            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1);
+            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         elif mode == "ROV3":
-            # use xiaomi wifi camera
-            #TODO
-            pass
+            self.get_img_ref = self.get_xiaomi_image
 
     def get_image(self):
         '''
@@ -36,3 +36,6 @@ class BumperCamRight(IBaseCamera):
     def get_hardware_image(self):
         _, frame = self.cap.read()
         return cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
+    def get_xiaomi_image(self):
+        raise Exception("Bumper camera not implemented in ROV3")
