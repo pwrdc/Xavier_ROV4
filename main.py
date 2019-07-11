@@ -21,6 +21,7 @@ from communication.rpi_broker.movements import Movements
 
 #Task sceduller
 from tasks.tasks_scheduler import TaskSchedululer
+from tasks.erl_task_scheduler import TaskSchedululer as ErlTaskScheduler
 
 #CHECK MODE
 # TODO - replace with checkoing if is conection to simulation or real rpi
@@ -81,14 +82,18 @@ class Main():
         self.control = {'movements': self.movements}
 
         # task sheduler
-        self.task_scheduler = TaskSchedululer(self.control, self.sensors, self.cameras, self.logger)
-        self.logger.log("task scheduler created")
+        if mode == "ROV3":
+            self.task_scheduler = ErlTaskScheduler(self.control, self.sensors, self.cameras, self.logger)
+            self.logger.log("ERL task scheduler created")
+        else:
+            self.task_scheduler = TaskSchedululer(self.control, self.sensors, self.cameras, self.logger)
+            self.logger.log("task scheduler created")
 
     def run(self):
         self.logger.log("main thread is running")
         self.task_scheduler.run()
 
 
-if __name__== "__main__":
+if __name__ == "__main__":
     main = Main()
     main.run()
