@@ -1,5 +1,6 @@
 import abc
 
+
 class IBaseCamera:
     """
     interface for all camera classes

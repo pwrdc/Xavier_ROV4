@@ -2,6 +2,7 @@ import cv2
 from vision.base_camera_itf import IBaseCamera
 from definitions import CAMERAS
 
+
 class FrontCamera1(IBaseCamera):
     '''
     Camera positioned at the front of AUV
@@ -18,21 +19,34 @@ class FrontCamera1(IBaseCamera):
             self.get_img_ref = self.get_simulation_image
         elif mode == 'HARDWARE':
             self.cap = cv2.VideoCapture(CAMERAS.FRONT_CAM_1_NR)
+            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            self.get_img_ref = self.get_hardware_image
         elif mode == "ROV3":
-            # use xiaomi wifi camera
-            #TODO
-            pass
+            self.cap = cv2.VideoCapture(CAMERAS.XIAOMI_CAMERA_SOURCE)
+            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            self.get_img_ref = self.get_xiaomi_image
 
     def get_image(self):
         '''
-        :return: the latest image captured from camera, standard openCV type
+        :return: the latest image capd from camera, standard openCV type
         '''
         return self.get_img_ref()
 
     def get_simulation_image(self):
-        self.simulation_ref.set_camera_focus(0)
+        self.simulation_ref.set_camera_focus(CAMERAS.SIM_FRONT_CAM_1_ID)
         return self.simulation_ref.get_image()
 
     def get_hardware_image(self):
         _, frame = self.cap.read()
         return cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
+    def get_xiaomi_image(self):
+        _, frame = self.cap.read()
+        return cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+
+if __name__ == '__main__':
+    cam = FrontCamera1(mode="HARDWARE")
+
+    while True:
+        frame = cam.get_image()
+        cv2.imwrite('test_image.png', frame)
