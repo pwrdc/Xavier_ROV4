@@ -1,7 +1,7 @@
 from tasks.task_executor_itf import ITaskExecutor
 
 from tasks.gate.task_executor import TaskExecutor as GateExecutor
-from tasks.path.task_executor import TaskExecutor as PathExecutor
+from tasks.auto_movements.prequalification import Prequalification
 
 
 class TaskSchedululer(ITaskExecutor):
@@ -24,3 +24,6 @@ class TaskSchedululer(ITaskExecutor):
         This method is started by main object.
         """
         self.logger.log("Task scheduler is running")
+        prequalification = Prequalification(self.control_dict, self.sensors_dict,
+                                            self.cameras_dict, self.logger)
+        prequalification.run()
