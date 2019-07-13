@@ -11,7 +11,7 @@ class HolesDetector():
     def __init__(self, current_directory= "tasks/torpedoes/"):
         self.CURRENT_DIRECTORY = current_directory
 
-        template = cv2.imread(CURRENT_DIRECTORY + 'heart_template.png', cv2.CV_8UC1)
+        template = cv2.imread(self.CURRENT_DIRECTORY + 'heart_template.png', cv2.CV_8UC1)
         self.contours_template, self.hierarchy_template = cv2.findContours(template, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
     def prepareImage(self, frame):
