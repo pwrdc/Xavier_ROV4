@@ -1,6 +1,6 @@
 
 class MAINDEF:
-    MODE = 'SIMULATION'  # 'SIMULATION' or 'RPI'
+    MODE = 'SIMULATION'  # 'SIMULATION' or 'RPI' or 'ROV3'
 
 
 class CAMERAS:
