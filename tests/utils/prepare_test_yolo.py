@@ -16,11 +16,7 @@ def prepare_test_yolo():
 
     if not os.path.isdir(MODEL_PATH):
         print("Model not found, downloading from google drive...")
-<<<<<<< HEAD
         os.system(f"cd {PROJECT_ROOT}/tests/resources/yolo && megatools dl '{LINK}'")
-=======
-        os.system(f"cd {PROJECT_ROOT}/tests/resources/yolo && megadl '{LINK}'")
->>>>>>> Removing PyCharm related files from tracking on git
 
         if not os.path.isfile(f"{MODEL_PATH}.zip"):
             print("Error: Could not download model file, aborting...")
@@ -36,11 +32,8 @@ def prepare_test_yolo():
 
     if not os.path.isfile(IMG_LINK):
         print("Example image not found, downloading from google drive")
-<<<<<<< HEAD
+
         os.system(f"cd {PROJECT_ROOT}/tests/resources/yolo && megatools dl '{IMG_LINK}'")
-=======
-        os.system(f"cd {PROJECT_ROOT}/tests/resources/yolo && megadl '{IMG_LINK}'")
->>>>>>> Removing PyCharm related files from tracking on git
 
         if not os.path.isfile(f"{IMG_PATH}"):
             print("Error: Could not download example image file, aborting...")
