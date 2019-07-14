@@ -1,5 +1,6 @@
 from utils.python_subtask import PythonSubtask
 import requests
+from utils.networking import post_request
 import time
 from typing import Any
 import  pickle
@@ -10,13 +11,15 @@ class PythonRESTSubtask(PythonSubtask):
     Class for interacting with python subtask REST services
     """
 
-    def __init__(self, path, port=5000):
+    def __init__(self, path, port=5000, post_request_fn=post_request):
         """
         :param path: Path to python script that is run, relative to project root
         :param port port on which server will be found
+        :param post_request_fn: f(url, data) that will be used for posts requests to subtasks
         """
         super().__init__(path)
         self.port = port
+        self.post_request = post_request_fn
 
     def wait_ready(self, url="is_ready", expected_response="true", poll_time=1, timeout=None) -> bool:
         """
@@ -54,7 +57,7 @@ class PythonRESTSubtask(PythonSubtask):
         if pickle_data:
             data = pickle.dumps(data)
 
-        req = requests.post(f"http://localhost:{self.port}/{url}", data=data)
+        req = requests.post(url=f"http://localhost:{self.port}/{url}", data=data)
         result = req.content
 
         if unpickle_result:
@@ -74,7 +77,7 @@ class PythonRESTSubtask(PythonSubtask):
         if pickle_data:
             data = pickle.dumps(data)
 
-        req = requests.get(f"http://localhost:{self.port}/{url}", data=data)
+        req = requests.get(url=f"http://localhost:{self.port}/{url}", data=data)
         result = req.content
 
         if unpickle_result:
