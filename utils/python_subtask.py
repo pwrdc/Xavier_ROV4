@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 from utils.project_managment import PROJECT_ROOT
 from subprocess import Popen
 from typing import Optional
@@ -54,6 +55,8 @@ class PythonSubtask:
     def __del__(self):
         self.kill()
 =======
+=======
+>>>>>>> Removing PyCharm related files from tracking on git
 from utils.project_managment import PROJECT_ROOT
 from subprocess import Popen
 from typing import Optional
@@ -103,4 +106,7 @@ class PythonSubtask:
 
     def __del__(self):
         self.kill()
+<<<<<<< HEAD
+>>>>>>> Removing PyCharm related files from tracking on git
+=======
 >>>>>>> Removing PyCharm related files from tracking on git

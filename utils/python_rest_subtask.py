@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 from utils.python_subtask import PythonSubtask
 import requests
 from utils.networking import post_request
@@ -105,6 +106,8 @@ class PythonRESTSubtask(PythonSubtask):
         return task
 
 =======
+=======
+>>>>>>> Removing PyCharm related files from tracking on git
 from utils.python_subtask import PythonSubtask
 import requests
 import time
@@ -207,4 +210,7 @@ class PythonRESTSubtask(PythonSubtask):
 
         return task
 
+<<<<<<< HEAD
+>>>>>>> Removing PyCharm related files from tracking on git
+=======
 >>>>>>> Removing PyCharm related files from tracking on git

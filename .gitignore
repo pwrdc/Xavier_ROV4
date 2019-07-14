@@ -1,9 +1,12 @@
 # PyCharm editor
 .idea
 
+<<<<<<< HEAD
 # Vs Code
 .vscode
 
+=======
+>>>>>>> Removing PyCharm related files from tracking on git
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
