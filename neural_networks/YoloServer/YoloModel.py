@@ -68,8 +68,6 @@ class YoloModel:
 
         coordinates_pred = predictions[0, best_prediction[0], best_prediction[1], 0:4]
 
-        print(coordinates_pred)
-
         x = (best_prediction[0] + coordinates_pred[0]) / pred_mat_shape[0]
         y = (best_prediction[1] + coordinates_pred[1]) / pred_mat_shape[1]
         w = coordinates_pred[2]
