@@ -20,13 +20,10 @@ class BoundingBox:
         self.w = w
         self.h = h
 
-<<<<<<< HEAD
         # Center - relative coordinates
         self.xc = 2*x - 1
         self.yc = 2*y - 1
 
-=======
->>>>>>> Removing PyCharm related files from tracking on git
         # Diagonal coordinates
         self.x1 = x - w/2
         self.x2 = x + w/2
@@ -37,7 +34,6 @@ class BoundingBox:
         self.p1 = (self.x1, self.y1)
         self.p2 = (self.x2, self.y2)
 
-<<<<<<< HEAD
     def to_dict(self):
         return {
             "x": self.x,
@@ -46,8 +42,6 @@ class BoundingBox:
             "h": self.h
         }
 
-=======
->>>>>>> Removing PyCharm related files from tracking on git
     @staticmethod
     def from_points(x1, y1, x2, y2):  # -> BoundingBox
         """

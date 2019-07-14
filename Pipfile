@@ -6,8 +6,13 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
+<<<<<<< HEAD
 opencv-python = "*"
 tensorflow = "*"
+=======
+tensorflow-gpu = "*"
+opencv-python = "*"
+>>>>>>> Added fps test for Yolo
 
 [requires]
 python_version = "3.7"

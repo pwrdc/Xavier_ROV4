@@ -32,7 +32,12 @@ class YoloModel:
         :return: None
         """
         self.session = tf.Session()
+                
         self.saver = tf.train.import_meta_graph(f"{self.model_path}/model.chkpt.meta")
+        
+        self.session.run(tf.global_variables_initializer())
+        self.session.run(tf.local_variables_initializer())
+
         self.saver.restore(self.session, f"{self.model_path}/model.chkpt")
 
         self.inputs = self.session.graph.get_tensor_by_name(self.input_tensor_name)
@@ -68,11 +73,6 @@ class YoloModel:
 
         coordinates_pred = predictions[0, best_prediction[0], best_prediction[1], 0:4]
 
-<<<<<<< HEAD
-=======
-        print(coordinates_pred)
-
->>>>>>> Removing PyCharm related files from tracking on git
         x = (best_prediction[0] + coordinates_pred[0]) / pred_mat_shape[0]
         y = (best_prediction[1] + coordinates_pred[1]) / pred_mat_shape[1]
         w = coordinates_pred[2]
