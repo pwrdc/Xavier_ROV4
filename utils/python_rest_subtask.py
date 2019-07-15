@@ -102,4 +102,3 @@ class PythonRESTSubtask(PythonSubtask):
             task.wait_ready()
 
         return task
-

@@ -32,7 +32,6 @@ def prepare_test_yolo():
 
     if not os.path.isfile(IMG_LINK):
         print("Example image not found, downloading from google drive")
-
         os.system(f"cd {PROJECT_ROOT}/tests/resources/yolo && megatools dl '{IMG_LINK}'")
 
         if not os.path.isfile(f"{IMG_PATH}"):

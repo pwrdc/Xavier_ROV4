@@ -24,6 +24,7 @@ class BoundingBox:
         self.xc = 2*x - 1
         self.yc = 2*y - 1
 
+
         # Diagonal coordinates
         self.x1 = x - w/2
         self.x2 = x + w/2

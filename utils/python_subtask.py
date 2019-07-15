@@ -2,7 +2,6 @@ from utils.project_managment import PROJECT_ROOT
 from subprocess import Popen
 from typing import Optional
 
-
 class PythonSubtask:
     def __init__(self, path: str):
         """
