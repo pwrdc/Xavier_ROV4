@@ -22,27 +22,36 @@ class Prequalification(ITaskExecutor):
         time_surface = 5
         time_move_front = 20
         time_short_mov_front = 3
-        
+
+        self.logger.log("Pre-qualification: dive")
         self.movements.pid_set_depth(default_depth)
         self.movements.pid_turn_on()
         time.sleep(time_surface)
 
+        self.logger.log("Pre-qualification: move front")
         self.movements.set_lin_velocity(front=50)
         time.sleep(time_move_front)
         self.movements.set_lin_velocity()
 
+        self.logger.log("Pre-qualification: first rotate 90 degrees")
         self.movements.rotate_angle(yaw=90.0)
         
+        self.logger.log("Pre-qualification: move front - short")
         self.movements.set_lin_velocity(front=50)
         self.movements.set_lin_velocity(time_short_mov_front)
         self.movements.set_lin_velocity()
 
+        self.logger.log("Pre-qualification: second rotate 90 degrees")
         self.movements.rotate_angle(yaw=90.0)
 
+        self.logger.log("Pre-qualification: second move front")
         self.movements.set_lin_velocity(front=50)
         time.sleep(time_move_front)
         self.movements.set_lin_velocity()
 
+        self.logger.log("Pre-qualification: surface")
         self.movements.pid_set_depth(0.0)
         time.sleep(time_surface)
         self.movements.pid_turn_off()
+
+        self.logger.log("Pre-qualification: end")

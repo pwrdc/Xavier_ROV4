@@ -2,7 +2,6 @@ from logpy.LogPy import Logger
 import threading
 
 #Cameras
-from communication.unity_driver import UnityDriver
 from vision.front_cam_1 import FrontCamera1
 from vision.bottom_camera import BottomCamera
 from vision.arm_camera import ArmCamera
@@ -26,6 +25,11 @@ from tasks.erl_task_scheduler import TaskSchedululer as ErlTaskScheduler
 #CHECK MODE
 # TODO - replace with checkoing if is conection to simulation or real rpi
 from definitions import MAINDEF
+
+#simulation
+if MAINDEF.MODE == "SIMULATION":
+    from communication.unity_driver import UnityDriver
+
 
 class Main():
     '''

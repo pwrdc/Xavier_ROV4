@@ -51,24 +51,24 @@ class Movements:
         """
         Turn on PID
         """
-        self.rpi_reference.sensors_refs['Movements'].pid_depth_turn_on()
+        self.rpi_reference.pid_depth_turn_on()
 
     def pid_turn_off(self):
         """
         Turn off PID
         """
-        self.rpi_reference.sensors_refs['Movements'].pid_depth_turn_off()
+        self.rpi_reference.pid_depth_turn_off()
 
     def pid_hold_depth(self):
         """
         Set the current depth as the default depth
         Function DOESN'T activate pid, use pid_turn_on additionally
         """
-        self.rpi_reference.sensors_refs['Movements'].pid_hold_depth()
+        self.rpi_reference.pid_hold_depth()
 
     def pid_set_depth(self, depth):
         """
         Set depth, function DOESN'T activate pid, use pid_turn_on additionally
         :param: depth - float - target depth for PID
         """
-        self.rpi_reference.sensors_refs['Movements'].set_depth(depth)
+        self.rpi_reference.pid_set_depth(depth)
