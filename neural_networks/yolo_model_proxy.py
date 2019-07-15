@@ -1,5 +1,6 @@
 import numpy as np
 from utils.python_rest_subtask import PythonRESTSubtask
+from structures.bounding_box import BoundingBox
 from typing import Optional
 from utils.networking import get_free_port
 
@@ -28,7 +29,7 @@ class YoloModelProxy:
                                                  f"-p {self.port} -m {self.model_path}", port=self.port,
                                                  wait_ready=True)
 
-    def predict(self, image: np.ndarray) -> Optional[PythonRESTSubtask]:
+    def predict(self, image: np.ndarray) -> Optional[BoundingBox]:
         """
         Finds object on an image
         :param image: np.array representing RGB image with values from 0 to 255
