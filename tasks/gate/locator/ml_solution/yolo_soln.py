@@ -1,9 +1,12 @@
 from tasks.gate.locator.locator_itf import ILocator
+from neural_networks.yolo_model_proxy import YoloModelProxy
 
-class Locator(ILocator):
-    """
-    gate locator
-    """
+class YoloGateLocator(ILocator):
+    def __init__(self, threshold=0.5):
+        self.model = YoloModelProxy("models/modelYOLO_gate1", threshold=threshold)
+
+    def __del__(self):
+        self.model.release()
 
     def get_gate_cordinates(self, image):
         """
@@ -17,4 +20,7 @@ class Locator(ILocator):
             values are floats in the range [0, 1], where 1 - means - height of all picture, and 0.5 - half of height
             example: {"x":0.4, "y":0.5, "h":0.5, "w":0.2}
         """
-        pass
+
+        self.model.predict(image).to_dict()
+        
+        

@@ -18,3 +18,8 @@ class IModel(metaclass=abc.ABCMeta):
         """ method for runing prediction
         """
         pass
+
+    @abc.abstractmethod
+    def release(self):
+        """ method for releasing model resources
+        """
