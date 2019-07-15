@@ -20,10 +20,13 @@ class BoundingBox:
         self.w = w
         self.h = h
 
+<<<<<<< HEAD
         # Center - relative coordinates
         self.xc = 2*x - 1
         self.yc = 2*y - 1
 
+=======
+>>>>>>> 31e0dcd5d3ae73f0c261fe9f28c6d26b70c9839b
         # Diagonal coordinates
         self.x1 = x - w/2
         self.x2 = x + w/2
@@ -34,6 +37,7 @@ class BoundingBox:
         self.p1 = (self.x1, self.y1)
         self.p2 = (self.x2, self.y2)
 
+<<<<<<< HEAD
     def to_dict(self):
         return {
             "x": self.x,
@@ -42,6 +46,8 @@ class BoundingBox:
             "h": self.h
         }
 
+=======
+>>>>>>> 31e0dcd5d3ae73f0c261fe9f28c6d26b70c9839b
     @staticmethod
     def from_points(x1, y1, x2, y2):  # -> BoundingBox
         """

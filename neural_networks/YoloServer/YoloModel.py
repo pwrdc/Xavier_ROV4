@@ -32,7 +32,13 @@ class YoloModel:
         :return: None
         """
         self.session = tf.Session()
+                
         self.saver = tf.train.import_meta_graph(f"{self.model_path}/model.chkpt.meta")
+        
+        self.session.run(tf.global_variables_initializer())
+        self.session.run(tf.local_variables_initializer())
+
+
         self.saver.restore(self.session, f"{self.model_path}/model.chkpt")
 
         self.inputs = self.session.graph.get_tensor_by_name(self.input_tensor_name)

@@ -1,7 +1,11 @@
 # PyCharm editor
 .idea
 
+<<<<<<< HEAD
 # Vs Code
+=======
+# VSCode editor
+>>>>>>> 31e0dcd5d3ae73f0c261fe9f28c6d26b70c9839b
 .vscode
 
 # Byte-compiled / optimized / DLL files
