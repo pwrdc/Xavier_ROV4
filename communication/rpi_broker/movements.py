@@ -51,13 +51,13 @@ class Movements:
         """
         Turn on PID
         """
-        self.rpi_reference.sensors_refs['Movements'].pid_turn_on()
+        self.rpi_reference.sensors_refs['Movements'].pid_depth_turn_on()
 
     def pid_turn_off(self):
         """
         Turn off PID
         """
-        self.rpi_reference.sensors_refs['Movements'].pid_turn_off()
+        self.rpi_reference.sensors_refs['Movements'].pid_depth_turn_off()
 
     def pid_hold_depth(self):
         """
