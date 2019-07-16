@@ -58,6 +58,7 @@ if __name__ == '__main__':
     if args.visualize:
         VISUALIZE_OUTPUT = True
 
+    # TODO: Fix problems with relative / absolute paths
     SELECTED_IMAGE_PATH = args.image
     SELECTED_MODEL_PATH = args.model
 
