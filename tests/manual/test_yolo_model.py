@@ -5,12 +5,15 @@ import cv2
 import numpy as np
 from tests.utils.prepare_test_yolo import prepare_test_yolo, MODEL_PATH, IMG_PATH
 from tests.utils.stopwatch import Stopwatch
+from utils.project_managment import PROJECT_ROOT
 import argparse
 
 VISUALIZE_OUTPUT = False
+SELECTED_MODEL_PATH=MODEL_PATH
+SELECTED_IMAGE_PATH=IMG_PATH
 
 def test_ModelSetup(img):
-    model = YoloModel(MODEL_PATH, prediction_tensor_name="conv2d_1/Sigmoid:0", input_tensor_name="input_1:0")
+    model = YoloModel(f"{PROJECT_ROOT}/{SELECTED_MODEL_PATH}", prediction_tensor_name="conv2d_1/Sigmoid:0", input_tensor_name="input_1:0")
     model.load()
     result = model.predict(img)
 
@@ -48,13 +51,25 @@ def test_ModelFPS(model, num_predictions=100):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Tests of Yolo Neural Network model')
     parser.add_argument("-v", "--visualize", action="store_true", help="Show output of neural network on an image")
+    parser.add_argument("-m", "--model", default=MODEL_PATH, help="Path to folder containing model files")
+    parser.add_argument("-i", "--image", default=IMG_PATH, help="Path to image on which visualization will be made")
     args = parser.parse_args()
 
     if args.visualize:
         VISUALIZE_OUTPUT = True
 
-    prepare_test_yolo()
-    img = cv2.imread(IMG_PATH)
+    SELECTED_IMAGE_PATH = args.image
+    SELECTED_MODEL_PATH = args.model
+
+    print(f"Selected model: {SELECTED_MODEL_PATH}")
+    print(f"Selected image: {SELECTED_IMAGE_PATH}")
+
+    if SELECTED_IMAGE_PATH==IMG_PATH or SELECTED_MODEL_PATH==MODEL_PATH:
+        prepare_test_yolo()
+
+    img = cv2.imread(SELECTED_IMAGE_PATH)
+
+    print(img)
 
     model = test_ModelSetup(img)
     test_ModelFPS(model, 100)
