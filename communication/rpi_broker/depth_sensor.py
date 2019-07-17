@@ -9,6 +9,6 @@ class DepthSensor:
     def get_depth(self):
         '''
         Get current depth
-        :return: depth as single integer in cm
+        :return: depth as single float in cm
         '''
         return self.rpi_reference.get_depth()

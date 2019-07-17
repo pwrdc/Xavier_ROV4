@@ -17,7 +17,7 @@ class ILocator(metaclass=abc.ABCMeta):
             0 is centre, 0.5 is halfway between 0 anf max right or up etc.
 
             and h,w (hight, width of bounding box)
-            values are floats in the range [0, 1], where 1 - means - height of all picture, and 0.5 - half of height
+            values are floats in the range [0, 1], where 1 - means - height of whole picture, and 0.5 - half of height
             example: {"x":0.4, "y":0.5, "h":0.5, "w":0.2}
         """
         pass

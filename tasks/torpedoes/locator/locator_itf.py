@@ -51,6 +51,9 @@ class ILocator(metaclass=abc.ABCMeta):
         :return: dictionary with x,y cordinates of path in relative to centre of camera (0,0)
             values are floats in the range [-1, 1], where -1 is max left of max down cordinate,
             0 is centre, 0.5 is halfway between 0 anf max right or up etc.
-            example: {"x":0.4, "y":0.5}
+
+            and h,w (hight, width of bounding box)
+            values are floats in the range [0, 1], where 1 - means - height of whole picture, and 0.5 - half of height
+            example: {"x":0.4, "y":0.5, "h":0.5, "w":0.2}
         """
         pass
