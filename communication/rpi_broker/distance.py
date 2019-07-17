@@ -10,6 +10,6 @@ class DistanceSensor:
         '''
         Get distance from obstacle in front of ROV
 
-        :return: distance as single integer
+        :return: distance in cm as single float
         '''
         return self.rpi_reference.get_front_distance()

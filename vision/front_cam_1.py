@@ -28,7 +28,7 @@ class FrontCamera1(IBaseCamera):
 
     def get_image(self):
         '''
-        :return: the latest image capd from camera, standard openCV type
+        :return: the latest image capd from camera, standard openCV frame
         '''
         return self.get_img_ref()
 

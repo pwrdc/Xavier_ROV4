@@ -25,7 +25,7 @@ class BumperCamRight(IBaseCamera):
 
     def get_image(self):
         '''
-        :return: the latest image captured from camera, standard openCV type
+        :return: the latest image captured from camera, standard openCV frame
         '''
         return self.get_img_ref()
 
