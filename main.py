@@ -19,6 +19,7 @@ from communication.rpi_broker.distance import DistanceSensor
 # Control
 from communication.rpi_broker.movements import Movements
 from communication.rpi_broker.torpedoes import Torpedoes
+from communication.rpi_broker.manipulator import Manipulator
 
 #Task sceduller
 from tasks.tasks_scheduler import TaskSchedululer
@@ -84,10 +85,12 @@ class Main():
         #control
         self.movements = Movements(self.rpi_reference)
         self.torpedoes = Torpedoes(self.rpi_reference)
+        self.manipulator = Manipulator(self.rpi_reference)
         self.logger.log("control objects created")
 
         self.control = {'movements': self.movements,
-                        'torpedoes': self.torpedoes}
+                        'torpedoes': self.torpedoes,
+                        'manipulator': self.manipulator}
 
         # task sheduler
         if mode == "ROV3":

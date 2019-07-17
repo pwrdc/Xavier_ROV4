@@ -16,7 +16,7 @@ class ITaskExecutor(metaclass=abc.ABCMeta):
     def __init__(self, contorl_dict, sensors_dict, cameras_dict, main_logger):
         """
         @param: movement_object is an object of Movements Class
-            keywords: movements; torpedoes;
+            keywords: movements; torpedoes; manipulator;
         @param: sensors_dict is a dictionary of references to sensors objects
             keywords: ahrs; depth; hydrophones; distance;
         @param: cameras_dict is a dictionary of references to cameras objects
