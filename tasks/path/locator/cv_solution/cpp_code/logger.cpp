@@ -11,7 +11,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <sys/time.h>
+#include <time.h>
 #include <map>
 
 namespace constants
@@ -48,20 +48,19 @@ Logger::~Logger()
 
 string Logger::getDate()
 {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
     time_t tp = time(NULL);
     tm *ts = localtime(&tp);
     
     string date = "[" + to_string(ts->tm_year + 1900) + "-" + to_string(ts->tm_mon + 1) + "-" + to_string(ts->tm_mday)
-    + " | " + to_string(ts->tm_hour) + ":" + to_string(ts->tm_min) + ":" + to_string(ts->tm_sec) + "." + to_string(tv.tv_usec) + "]";
+    + " | " + to_string(ts->tm_hour) + ":" + to_string(ts->tm_min) + ":" + to_string(ts->tm_sec) + "]";
     
     return date;
 }
 
 string Logger::createFileName()
 {
-    return "Logs/PathDetection " + getDate() + ".log";
+    //return "Logs/PathDetection " + getDate() + ".log";
+	return "path_logs.log";
 }
 
 void Logger::saveLog(int frameNumber, vector<vector<double>> lineValues, vector<double> lineAverage)
