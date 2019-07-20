@@ -4,7 +4,6 @@
 # VSCode editor
 .vscode
 
-
 # Tensorboard files
 tensorboard
 
@@ -112,3 +111,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# custom - tests
+*camera_test.png

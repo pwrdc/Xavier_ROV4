@@ -7,17 +7,17 @@ class FrontCamera1(IBaseCamera):
     '''
     Camera positioned at the front of AUV
     '''
-    def __init__(self, mode="HARDWARE", simulation_ref=None):
+    def __init__(self, mode="ROV4", simulation_ref=None):
         """
-        :param: hardware - decide if camera get video from simulation or real camera
-            two option: "HARDWARE" or "SIMULATION" or "ROV3"
+        :param: ROV4 - decide if camera get video from simulation or real camera
+            two option: "ROV4" or "SIMULATION" or "ROV3"
         """
         self.mode = mode
         self.simulation_ref = simulation_ref
         self.get_img_ref = self.get_hardware_image
         if mode == 'SIMULATION':
             self.get_img_ref = self.get_simulation_image
-        elif mode == 'HARDWARE':
+        elif mode == 'ROV4':
             self.cap = cv2.VideoCapture(CAMERAS.FRONT_CAM_1_NR)
             self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
             self.get_img_ref = self.get_hardware_image
@@ -25,6 +25,10 @@ class FrontCamera1(IBaseCamera):
             self.cap = cv2.VideoCapture(CAMERAS.XIAOMI_CAMERA_SOURCE)
             self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
             self.get_img_ref = self.get_xiaomi_image
+
+    def __del__(self):
+        if self.mode == 'ROV4' or self.mode == 'ROV3':
+            self.cap.release()
 
     def get_image(self):
         '''
@@ -45,7 +49,7 @@ class FrontCamera1(IBaseCamera):
         return cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
 if __name__ == '__main__':
-    cam = FrontCamera1(mode="HARDWARE")
+    cam = FrontCamera1(mode="ROV4")
 
     while True:
         frame = cam.get_image()
