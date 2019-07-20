@@ -1,5 +1,4 @@
 import cv2
-import time
 from unittest import TestCase, TestSuite, TextTestRunner, makeSuite
 
 from definitions import CAMERAS, MAINDEF
@@ -33,7 +32,6 @@ class TestFrontCamera1(TestCase):
         frame = camera.get_image()
         cv2.imwrite("front_cam_1_camera_test.png", frame)
         camera.__del__()
-        time.sleep(2)
 
 class TestBottomCamera(TestCase):
     def test_get_image(self):
@@ -42,7 +40,6 @@ class TestBottomCamera(TestCase):
         frame = camera.get_image()
         cv2.imwrite("bottom_camera_test.png", frame)
         camera.__del__()
-        time.sleep(2)
 
 class TestArmCamera(TestCase):
     def test_get_image(self):
@@ -50,7 +47,7 @@ class TestArmCamera(TestCase):
         camera = ArmCamera(mode=MAINDEF.MODE)
         frame = camera.get_image()
         cv2.imwrite("arm_camera_test.png", frame)
-        time.sleep(2)
+        camera.__del__()
 
 class TestBumperCameraLeft(TestCase):
     def test_get_image(self):
@@ -58,7 +55,7 @@ class TestBumperCameraLeft(TestCase):
         camera = BumperCamLeft(mode=MAINDEF.MODE)
         frame = camera.get_image()
         cv2.imwrite("bumper_left_camera_test.png", frame)
-        time.sleep(2)
+        camera.__del__()
 
 class TestBumperCameraRight(TestCase):
     def test_get_image(self):
@@ -66,7 +63,7 @@ class TestBumperCameraRight(TestCase):
         camera = BumperCamLeft(mode=MAINDEF.MODE)
         frame = camera.get_image()
         cv2.imwrite("bumper_right_camera_test.png", frame)
-        time.sleep(2)
+        camera.__del__()
 
 if __name__ == '__main__':
     print("Crucifix tester")

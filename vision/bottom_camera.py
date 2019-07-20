@@ -26,7 +26,6 @@ class BottomCamera(IBaseCamera):
     def __del__(self):
         if self.mode == 'ROV4':
             self.cap.release()
-            print("del")
 
     def get_image(self):
         '''
