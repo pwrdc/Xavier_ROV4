@@ -8,6 +8,8 @@ verify_ssl = true
 [packages]
 tensorflow-gpu = "*"
 opencv-python = "*"
+requests = "*"
+flask = "*"
 
 [requires]
 python_version = "3.7"
