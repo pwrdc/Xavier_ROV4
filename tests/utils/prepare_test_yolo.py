@@ -16,7 +16,7 @@ def prepare_test_yolo():
 
     if not os.path.isdir(MODEL_PATH):
         print("Model not found, downloading from google drive...")
-        os.system(f"cd {PROJECT_ROOT}/tests/resources/yolo && megadl '{LINK}'")
+        os.system(f"cd {PROJECT_ROOT}/tests/resources/yolo && megatools dl '{LINK}'")
 
         if not os.path.isfile(f"{MODEL_PATH}.zip"):
             print("Error: Could not download model file, aborting...")
@@ -32,7 +32,7 @@ def prepare_test_yolo():
 
     if not os.path.isfile(IMG_LINK):
         print("Example image not found, downloading from google drive")
-        os.system(f"cd {PROJECT_ROOT}/tests/resources/yolo && megadl '{IMG_LINK}'")
+        os.system(f"cd {PROJECT_ROOT}/tests/resources/yolo && megatools dl '{IMG_LINK}'")
 
         if not os.path.isfile(f"{IMG_PATH}"):
             print("Error: Could not download example image file, aborting...")

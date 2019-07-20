@@ -1,10 +1,11 @@
 from tasks.model_itf import IModel
 from structures.bounding_box import BoundingBox
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # or any {'0', '1', '2'}
 import tensorflow as tf
 from typing import Optional
 import cv2
 import numpy as np
-
 
 class YoloModel:
     """
@@ -31,8 +32,16 @@ class YoloModel:
         Takes GPU resources and loads model from file into memory
         :return: None
         """
-        self.session = tf.Session()
-        self.saver = tf.train.import_meta_graph(f"{self.model_path}/model.chkpt.meta")
+        # Dont take all gpu mem on start 
+        config = tf.compat.v1.ConfigProto()
+        config.gpu_options.allow_growth=True
+        self.session = tf.compat.v1.Session(config=config)
+                
+        self.saver = tf.compat.v1.train.import_meta_graph(f"{self.model_path}/model.chkpt.meta")
+        
+        self.session.run(tf.compat.v1.global_variables_initializer())
+        self.session.run(tf.compat.v1.local_variables_initializer())
+
         self.saver.restore(self.session, f"{self.model_path}/model.chkpt")
 
         self.inputs = self.session.graph.get_tensor_by_name(self.input_tensor_name)
@@ -67,8 +76,6 @@ class YoloModel:
             return None
 
         coordinates_pred = predictions[0, best_prediction[0], best_prediction[1], 0:4]
-
-        print(coordinates_pred)
 
         x = (best_prediction[0] + coordinates_pred[0]) / pred_mat_shape[0]
         y = (best_prediction[1] + coordinates_pred[1]) / pred_mat_shape[1]

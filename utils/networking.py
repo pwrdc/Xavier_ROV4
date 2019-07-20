@@ -1,5 +1,6 @@
 import socket
-
+from typing import Optional
+import requests
 
 def get_free_port() -> int:
     """
@@ -13,3 +14,20 @@ def get_free_port() -> int:
     free_socket.close()
 
     return port
+
+
+def post_request(url: str, data: any = None) -> Optional[str]:
+    """
+    Sends http post request to specified url with optional data
+
+    :param url: Target url for request, eg. http://google.com:80
+    :param data: Data that will be attached to request
+    :return: Response string if everyting is ok, None otherwise
+    """
+
+    response = requests.post(url=url, data=data)
+
+    if response.status_code != 200:
+        return None
+
+    return response.content

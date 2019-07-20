@@ -1,0 +1,14 @@
+{
+    "gate": {
+        "path": "models/modelYOLO_gate1",
+        "input_tensor": "input_1:0",
+        "output_tensor": "conv2d_1/Sigmoid:0",
+        "threshold": 0.5
+    },
+    "path": {
+        "path": "models/modelYOLO_path",
+        "input_tensor": "input_1:0",
+        "output_tensor": "conv2d_1/Sigmoid:0",
+        "threshold": 0.5
+    }
+}
