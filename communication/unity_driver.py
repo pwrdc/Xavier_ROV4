@@ -1,7 +1,7 @@
 import time
 from cv2 import COLOR_RGB2BGR, cvtColor, imshow, imwrite, rectangle, waitKey
 
-from pytransdec.pytransdec.communication import TransdecCommunication
+from communication.pytransdec.pytransdec.communication import TransdecCommunication
 import rpi_com.rov_comm as rov_comm
 import rpi_com.ports as ports
 

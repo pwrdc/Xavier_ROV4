@@ -72,3 +72,12 @@ class Movements:
         :param: depth - float - target depth for PID
         """
         self.rpi_reference.pid_set_depth(depth)
+
+    def pid_yaw_turn_on(self):
+        self.rpi_reference.pid_yaw_turn_on()
+
+    def pid_yaw_turn_off(self):
+        self.rpi_reference.pid_yaw_turn_on()
+
+    def pid_set_yaw(self, yaw):
+        self.rpi_reference.pid_set_yaw(yaw)

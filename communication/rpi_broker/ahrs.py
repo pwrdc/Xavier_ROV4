@@ -37,4 +37,7 @@ class AHRS:
         "angularA_y","angularA_z"
         '''
         return self.rpi_reference.get_all_data()
+
+    def get_yaw(self):
+        return self.rpi_reference.get_yaw()
     

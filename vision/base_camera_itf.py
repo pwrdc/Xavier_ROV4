@@ -9,6 +9,6 @@ class IBaseCamera:
     @abc.abstractmethod
     def get_image(self):
         '''
-        :return: the latest image captured from camera, standard openCV type
+        :return: the latest image captured from camera, standard openCV frame
         '''
         pass

@@ -56,32 +56,7 @@ PathDetector::~PathDetector()
 
 void PathDetector::run()
 {
-    isRunning = true;
     
-    createControlWindow();
-    
-    while (isRunning)
-    {
-        frame = captureSingleFrame();
-        
-        vector<double> tempVector = findLinesParameters(frame);
-        
-        updateParameters(tempVector);
-        
-        printParameters("ActualAfter", actualParameters);
-        
-        countAngleDifference();
-        
-        //cout << "rotationAngle:" << getRotationAngle() << "\n";
-        
-        //getIntersectionCoordinates();
-        
-        printFrame(frame);
-        
-        frameNumber++;
-        
-        checkIfRunning();
-    }
 }
 
 void PathDetector::createControlWindow()
@@ -105,9 +80,9 @@ vector<double> PathDetector::findLinesParameters(cv::Mat frame)
 {
     vector<vector<double>> tempParameters(4);
     vector<double> averageParameters(4);
-    
+
     vector<cv::Vec2f> lines = detectLines(frame);
-    
+
     if (!lines.empty())
     {
         tempParameters = sortParameters(lines);
@@ -188,7 +163,7 @@ vector<double>PathDetector::countAverage(vector<vector<double>> &tempParameters)
     return averageParameters;
 }
 
-vector<cv::Vec2f> PathDetector::detectLines(cv::Mat &frame)
+vector<cv::Vec2f> PathDetector::detectLines(cv::Mat frame)
 {
     const int rho = 1; //The resolution of the parameter \rho in pixels
     const int tresh = 50; //The minimum number of intersections to “detect” a line
@@ -198,7 +173,7 @@ vector<cv::Vec2f> PathDetector::detectLines(cv::Mat &frame)
     vector<cv::Vec2f> lines;
     
     prepareImage(frame);
-    
+
     HoughLines(frame, lines, rho, theta, tresh, srn, stn);
     
     return lines;
@@ -280,8 +255,6 @@ void PathDetector::updateParameters(vector<double> vector)
 void PathDetector::printFrame(cv::Mat printedFrame)
 {
     countCoordinates(printedFrame);
-    
-    cv::imshow("Path", printedFrame);
 }
 
 void PathDetector::countCoordinates(cv::Mat &printedFrame)
@@ -305,6 +278,10 @@ void PathDetector::countCoordinates(cv::Mat &printedFrame)
     pt2.x = cvRound(x0 - 1000 * -sin(actualParameters[2]));
     pt2.y = cvRound(y0 - 1000 * cos(actualParameters[2]));
     line(printedFrame, pt1, pt2, cv::Scalar(0, 0, 255), 3, CV_AA);
+    
+    
+    
+    imwrite("lines.png", printedFrame);
 }
 
 void PathDetector::countAngleDifference()
@@ -327,57 +304,59 @@ void PathDetector::countAngleDifference()
     }
 }
 
-int PathDetector::getRotationAngle(cv::Mat &frame)
+int PathDetector::getRotationAngle(const cv::Mat& frame)
 {
-    vector<double> tempVector = findLinesParameters(frame);
-    
+	cv::Mat cloned_frame = frame.clone();
+    vector<double> tempVector = findLinesParameters(cloned_frame);
+
     updateParameters(tempVector);
-    
-    printParameters("ActualAfter", actualParameters);
+
+    //printParameters("ActualAfter", actualParameters);
     
     countAngleDifference();
     
-    printFrame(frame);
+    printFrame(cloned_frame);
     
     return abs(angleDifference[0]) < abs(angleDifference[1]) ? int(angleDifference[1]) : int(angleDifference[0]);
 }
 
 void PathDetector::normalizeCoordinates(double& x, double& y, cv::Mat frame)
 {
-    x = (x - (frame.size().width/2))/(frame.size().width/2);
-    y = ((frame.size().height/2) - y)/(frame.size().height/2);
+    x = (abs(x) - (frame.size().width/2))/(frame.size().width/2);
+    y = ((frame.size().height/2) - abs(y))/(frame.size().height/2);
 }
 
-map<string,int> PathDetector::getIntersectionCoordinates(cv::Mat &frame)
+map<string,double> PathDetector::getIntersectionCoordinates(const cv::Mat& frame)
 {
-    vector<double> tempVector = findLinesParameters(frame);
-    
+	cv::Mat cloned_frame = frame.clone();
+    vector<double> tempVector = findLinesParameters(cloned_frame);
+
     updateParameters(tempVector);
-    
-    printParameters("ActualAfter", actualParameters);
+
+    //printParameters("ActualAfter", actualParameters);
     
     /*
     A1*x + B1*y + C1 = 0, A2*x + B2*y + C2 = 0
     A = cosTheta, B = sinTheta, C = Rho
      
-    X = (B1 * C1 - B2 * C2) / D
+    X = (B1 * C2 - B2 * C1) / D
     Y = (A1 * C2 - A2 * C1) / D
-    where D = A1 * B2 - A2 * B2
+    where D = A1 * B2 - A2 * B1
     */
-    map<string, int> coordinates;
+    map<string, double> coordinates;
     double d,x,y;
     
     d = cos(actualParameters[0])*sin(actualParameters[2]) - cos(actualParameters[2])*sin(actualParameters[0]);
-    x = (sin(actualParameters[0]) * actualParameters[1] - sin(actualParameters[2])*actualParameters[3])/d;
+    x = (sin(actualParameters[0]) * actualParameters[3] - sin(actualParameters[2])*actualParameters[1])/d;
     y = (cos(actualParameters[0])*actualParameters[3] - cos(actualParameters[2])*actualParameters[1])/d;
     
-    normalizeCoordinates(x, y, frame);
+    normalizeCoordinates(x, y, cloned_frame);
     
-    printFrame(frame);
+    printFrame(cloned_frame);
 
     coordinates["x"] = x;
     coordinates["y"] = y;
-    
+
     return coordinates;
 }
 

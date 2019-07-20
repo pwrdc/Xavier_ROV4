@@ -8,7 +8,7 @@ from vision.arm_camera import ArmCamera
 from vision.bumper_cam_right import BumperCamRight
 from vision.bumper_cam_left import BumperCamLeft
 
-#Sensors and control
+# Sensors
 from communication.communication import Communication
 
 from communication.rpi_broker.ahrs import AHRS
@@ -16,7 +16,10 @@ from communication.rpi_broker.depth_sensor import DepthSensor
 from communication.rpi_broker.hydrophones import Hydrophones
 from communication.rpi_broker.distance import DistanceSensor
 
+# Control
 from communication.rpi_broker.movements import Movements
+from communication.rpi_broker.torpedoes import Torpedoes
+from communication.rpi_broker.manipulator import Manipulator
 
 #Task sceduller
 from tasks.tasks_scheduler import TaskSchedululer
@@ -81,9 +84,13 @@ class Main():
                         'hydrophones': self.hydrophones}
         #control
         self.movements = Movements(self.rpi_reference)
+        self.torpedoes = Torpedoes(self.rpi_reference)
+        self.manipulator = Manipulator(self.rpi_reference)
         self.logger.log("control objects created")
 
-        self.control = {'movements': self.movements}
+        self.control = {'movements': self.movements,
+                        'torpedoes': self.torpedoes,
+                        'manipulator': self.manipulator}
 
         # task sheduler
         if mode == "ROV3":
