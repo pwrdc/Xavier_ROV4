@@ -28,8 +28,8 @@ class YoloModelProxy:
 
         # TODO: Add timeout
         self.server_task = PythonRESTSubtask.run("neural_networks/YoloServer/server.py",
-                                                 (f"-p {self.port} -m {self.model_path} -t {self.threshold}"
-                                                 "--input_tensor {self.input_tensor_name} --output_tensor {self.output_tensor_name}")
+                                                 (f"-p {self.port} -m {self.model_path} -t {self.threshold} "
+                                                 f"--input_tensor {self.input_tensor_name} --output_tensor {self.output_tensor_name}")
                                                  , port=self.port, wait_ready=True)
 
     def predict(self, image: np.ndarray) -> Optional[BoundingBox]:

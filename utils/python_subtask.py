@@ -31,7 +31,8 @@ class PythonSubtask:
         :return: None
         """
         if self.process is not None:
-            self.process.kill()
+            while self.process.poll() is None:
+                self.process.kill()
             self.process = None
 
     @staticmethod

@@ -1,10 +1,16 @@
 from tasks.path.locator.locator_itf import ILocator
 from neural_networks.yolo_model_proxy import YoloModelProxy
 from neural_networks.nn_manager import NNManager
+from structures.bounding_box import BoundingBox
 
 class YoloPathLocator(ILocator):
-    def __init__(self, threshold=0.5):
-        self.model = None
+    def get_path_bounding_box(self, image) -> BoundingBox:
+        """
+        Method for geting bounding box of path
+        @param: image captured from camera, standard openCV type
+        :return: Bounding box containing detected path
+        """
+        return NNManager.get_yolo_model("path").predict(image)
 
     def get_path_cordinates(self, image):
         """
@@ -15,17 +21,15 @@ class YoloPathLocator(ILocator):
             0 is centre, 0.5 is halfway between 0 anf max right or up etc.
             example: {"x":0.4, "y":0.5}
         """
-        if self.model is None or not self.model.is_active():
-            self.model = NNManager.get_yolo_model("path")
+        prediction = self.get_path_bounding_box(image)
 
-        self.model.predict(image).to_dict()
-
-        prediction = self.model.predict(image)
-
-        return {
-            "x": prediction.xc,
-            "y": prediction.yc
-        }
+        if prediction is not None:
+            return {
+                "x": prediction.xc,
+                "y": prediction.yc
+            }
+        else:
+            return None
 
 
     def get_rotation_angle(self, image):

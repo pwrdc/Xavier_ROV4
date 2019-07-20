@@ -3,6 +3,9 @@ import pickle
 import argparse as ap
 from neural_networks.YoloServer.YoloModel import YoloModel
 from utils.project_managment import PROJECT_ROOT
+import logging
+logging.basicConfig(level=logging.ERROR)
+
 
 if __name__ == "__main__":
     parser = ap.ArgumentParser(description="Train SSD Network")
@@ -17,8 +20,8 @@ if __name__ == "__main__":
 
     server = Flask(__name__)
 
-    model = YoloModel(f"{PROJECT_ROOT}/{args.model}", prediction_tensor_name=args.input_tensor,
-                      input_tensor_name=args.output_tensor, threshold=args.threshold)
+    model = YoloModel(f"{PROJECT_ROOT}/{args.model}", prediction_tensor_name=args.output_tensor,
+                      input_tensor_name=args.input_tensor, threshold=args.threshold)
     model.load()
 
     @server.route("/predict", methods=["POST"])
