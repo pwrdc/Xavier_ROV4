@@ -107,6 +107,26 @@ class BoundingBox:
     def __str__(self):
         return f"x={self.x}, y={self.y}, w={self.w}, h={self.h},"
 
+    def mvg_avg(self, new_observation: BoundingBox, discount_factor, inplace=False):
+        """
+        Function used to smooth noisy bounding box observations. 
+        :param new_observation: New observation of bounding box that will be incorporated with current one
+        :discount_factor: From 0 to 1. How much current knowledge is prefered over new one. If 0.0 - discard all old data
+                          (Similar to just setting values to new_observation ones). If 1.0 - knew knowledge will be discarded
+                          (This means -just do nothing)
+        """
+
+        x = (1 - discount_factor) * new_observation.x + discount_factor * self.x
+        y = (1 - discount_factor) * new_observation.y + discount_factor * self.y
+        w = (1 - discount_factor) * new_observation.w + discount_factor * self.w
+        h = (1 - discount_factor) * new_observation.h + discount_factor * self.h
+
+        if inplace:
+            self.__update_points(x,y,w,h)
+            return self
+        else:
+            return BoundingBox(x,y,w,h)
+
 
 if __name__ == "__main__":
 
