@@ -12,19 +12,24 @@ class GateTaskExecutor(ITaskExecutor):
         self._control = contorl_dict
         self._front_camera = cameras_dict['front_cam1']
         self._bounding_box = BoundingBox(0, 0, 0, 0)
-        self._config = get_config()['gate_task']
+        self.config = get_config()['gate_task']
         # For which path we are taking angle. For each path, rotation 
         # angle might be set differently in config.json
         self.number = 0
+        self.logger = main_logger
 
     def run(self):
+        self.logger.log("gate executor run")
         if not self.find_gate():
+            self.logger.log("gate: if not self.find_gate()")
             return 0
 
         if not self.center_on_gate():
+            self.logger.log("gate: if not self.center_on_gate():")
             return 0
 
-        if not self.rotate():
+        if not self.go_through_gate():
+            self.logger.log("gate: not self.go_through_gate()")
             return 0
 
         return 1
@@ -42,16 +47,16 @@ class GateTaskExecutor(ITaskExecutor):
         stopwatch.start() 
 
         while(True):
-            img = self._bottom_camera.get_image()
+            img = self._front_camera.get_image()
             bounding_box = YoloGateLocator().get_gate_bounding_box(img)
 
             confidence = 0
 
             if bounding_box is not None:
-                confidence = mvg_avg(1, MOVING_AVERAGE_DISCOUNT)
+                confidence = mvg_avg(1, confidence, MOVING_AVERAGE_DISCOUNT)
                 self._bounding_box.mvg_avg(bounding_box, 0.5, True)
             else:
-                confidence = mvg_avg(0, MOVING_AVERAGE_DISCOUNT)
+                confidence = mvg_avg(0, confidence, MOVING_AVERAGE_DISCOUNT)
 
             # Stop and report sucess if we are sure we found a path!
             if confidence > CONFIDENCE_THRESHOLD:
@@ -71,8 +76,8 @@ class GateTaskExecutor(ITaskExecutor):
         MAX_TIME_SEC = config['max_time_sec']
 
         while(True):
-            img = _front_camera.get_image()
-            bounding_box = YoloGateLocator().get_path_bounding_box(img)
+            img = self._front_camera.get_image()
+            bounding_box = YoloGateLocator().get_gate_bounding_box(img)
 
             # Try again if yolo did not return a box
             # TODO: Maybe go back?
@@ -86,7 +91,7 @@ class GateTaskExecutor(ITaskExecutor):
 
             # Stop if centered...
             # TODO: Because of moving avg probably we are too far. Might be problem
-            if abs(self.bounding_box.xc) < MAXIMAL_DISTANCE_CENTER and abs(self.bounding_box.yc) < MAXIMAL_DISTANCE_CENTER:
+            if abs(self._bounding_box.xc) < MAXIMAL_DISTANCE_CENTER and abs(self._bounding_box.yc) < MAXIMAL_DISTANCE_CENTER:
                 self._control.set_lin_velocity(0,0,0)
                 return True
 
