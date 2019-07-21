@@ -2,6 +2,10 @@
 File contains interface for task executor
 """
 import  abc
+from typing import Dict
+from vision.base_camera_itf import IBaseCamera
+
+Cameras = Dict[str, IBaseCamera]
 
 class ITaskExecutor(metaclass=abc.ABCMeta):
     """
@@ -13,7 +17,7 @@ class ITaskExecutor(metaclass=abc.ABCMeta):
     Every sub-algorithm also implement his interface
     """
     @abc.abstractmethod
-    def __init__(self, contorl_dict, sensors_dict, cameras_dict, main_logger):
+    def __init__(self, contorl_dict, sensors_dict, cameras_dict: Cameras, main_logger):
         """
         @param: movement_object is an object of Movements Class
             keywords: movements; torpedoes; manipulator;
