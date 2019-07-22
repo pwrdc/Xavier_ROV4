@@ -6,6 +6,9 @@ from structures.bounding_box import BoundingBox
 from utils.signal_processing import mvg_avg
 from utils.config import get_config
 from time import sleep
+import cv2
+
+from utils.python_rest_subtask import PythonRESTSubtask
 
 class GateTaskExecutor(ITaskExecutor):
     def __init__(self, contorl_dict: Movements, sensors_dict, cameras_dict: Cameras, main_logger):
@@ -14,6 +17,8 @@ class GateTaskExecutor(ITaskExecutor):
         self._bounding_box = BoundingBox(0, 0, 0, 0)
         self._logger = main_logger
         self.config = get_config()['gate_task']
+        self.img_server = PythonRESTSubtask("utils/img_server.py", 6669)
+        self.img_server.start()
         # For which path we are taking angle. For each path, rotation 
         # angle might be set differently in config.json
         self.number = 0
@@ -22,7 +27,7 @@ class GateTaskExecutor(ITaskExecutor):
         self._logger.log("Start gate task executor")
         self._control.pid_turn_on()
         self._control.pid_yaw_turn_on()
-        self._logger("gate: turn on depth and yaw contorl")
+        self._logger.log("gate: turn on depth and yaw contorl")
 
         if not self.find_gate():
             self._logger.log("gate: if not self.find_gate()")
@@ -38,6 +43,16 @@ class GateTaskExecutor(ITaskExecutor):
 
         return 1
 
+    def post_image(self, img, bounding_box = None):
+        if bounding_box is not None:
+            self.img_server.post("set_img", img, unpickle_result=False)
+            bb = bounding_box.denormalize(img.shape[1], img.shape[0])
+            p1 = (int(bb.x1), int(bb.y1))
+            p2 = (int(bb.x2), int(bb.y2))
+            img = cv2.rectangle(img, p1, p2, (255,0,255))
+        self._logger.log("img posted")
+        self.img_server.post("set_img", img, unpickle_result=False)
+
     def find_gate(self):
         self._logger.log("finding the gate")
         config = self.config['search']
@@ -49,17 +64,20 @@ class GateTaskExecutor(ITaskExecutor):
         self._control.set_ang_velocity(0,0, MAX_ANG_SPEED)
 
         stopwatch = Stopwatch()
-        stopwatch.start() 
+        stopwatch.start()
+        self._logger.log("searted find gate loop")
 
         while(True):
             img = self._front_camera.get_image()
             bounding_box = YoloGateLocator().get_gate_bounding_box(img)
+            self.post_image(img, bounding_box)
 
             confidence = 0
 
             if bounding_box is not None:
                 confidence = mvg_avg(1, confidence, MOVING_AVERAGE_DISCOUNT)
                 self._bounding_box.mvg_avg(bounding_box, 0.5, True)
+                self._logger.log("gate: somoething detected")
             else:
                 confidence = mvg_avg(0, confidence, MOVING_AVERAGE_DISCOUNT)
 
@@ -86,6 +104,7 @@ class GateTaskExecutor(ITaskExecutor):
         while(True):
             img = self._front_camera.get_image()
             bounding_box = YoloGateLocator().get_gate_bounding_box(img)
+            self.post_image(img, bounding_box)
 
             # Try again if yolo did not return a box
             # TODO: Maybe go back?
