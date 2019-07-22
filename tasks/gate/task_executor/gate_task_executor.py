@@ -12,29 +12,34 @@ class GateTaskExecutor(ITaskExecutor):
         self._control = contorl_dict
         self._front_camera = cameras_dict['front_cam1']
         self._bounding_box = BoundingBox(0, 0, 0, 0)
+        self._logger = main_logger
         self.config = get_config()['gate_task']
         # For which path we are taking angle. For each path, rotation 
         # angle might be set differently in config.json
         self.number = 0
-        self.logger = main_logger
 
     def run(self):
-        self.logger.log("gate executor run")
+        self._logger.log("Start gate task executor")
+        self._control.pid_turn_on()
+        self._control.pid_yaw_turn_on()
+        self._logger("gate: turn on depth and yaw contorl")
+
         if not self.find_gate():
-            self.logger.log("gate: if not self.find_gate()")
+            self._logger.log("gate: if not self.find_gate()")
             return 0
 
         if not self.center_on_gate():
-            self.logger.log("gate: if not self.center_on_gate():")
+            self._logger.log("gate: if not self.center_on_gate():")
             return 0
 
         if not self.go_through_gate():
-            self.logger.log("gate: not self.go_through_gate()")
+            self._logger.log("gate: not self.go_through_gate()")
             return 0
 
         return 1
 
     def find_gate(self):
+        self._logger.log("finding the gate")
         config = self.config['search']
         MAX_ANG_SPEED = config['max_ang_speed']
         MOVING_AVERAGE_DISCOUNT = config['moving_avg_discount']
@@ -60,15 +65,18 @@ class GateTaskExecutor(ITaskExecutor):
 
             # Stop and report sucess if we are sure we found a path!
             if confidence > CONFIDENCE_THRESHOLD:
+                self._logger.log("gate found")
                 self._control.set_ang_velocity(0,0,0)
                 return True 
 
             # Abort if we are running far away...
             if stopwatch.time() > MAX_TIME_SEC:
+                self._logger.log("gate not found - aboart")
                 self._control.set_ang_velocity(0,0,0)
                 return False 
 
     def center_on_gate(self):
+        self._logger.log("starting centering")
         config = self.config['centering']
         ENGINE_POWER = config['max_engine_power']
         MOVING_AVERAGE_DISCOUNT = config['moving_avg_discount']
@@ -89,10 +97,14 @@ class GateTaskExecutor(ITaskExecutor):
             stopwatch = Stopwatch()
             stopwatch.start() 
 
+            self._logger.log(f"Current detection x: {self._bounding_box.xc}")
+            self._logger.log(f"Current detection y: {self._bounding_box.yc}")
+
             # Stop if centered...
             # TODO: Because of moving avg probably we are too far. Might be problem
             if abs(self._bounding_box.xc) < MAXIMAL_DISTANCE_CENTER and abs(self._bounding_box.yc) < MAXIMAL_DISTANCE_CENTER:
                 self._control.set_lin_velocity(0,0,0)
+                self._logger.log("Centered!")
                 return True
 
             # Stop if centering too long...
@@ -107,6 +119,7 @@ class GateTaskExecutor(ITaskExecutor):
             self._control.set_lin_velocity(0, right_speed, up_speed)
 
     def go_through_gate(self):
+        self._logger.log("go thtough the gate")
         config = self.config['go']
         MAX_ENGINE_POWER = config['max_engine_power']
         GO_TIME = config['go_time_seconds']
@@ -114,7 +127,7 @@ class GateTaskExecutor(ITaskExecutor):
         self._control.set_lin_velocity(MAX_ENGINE_POWER)
         sleep(GO_TIME)
         self._control.set_lin_velocity(0)
-
+        self._logger.log("passed through the gate")
         return True
 
 
