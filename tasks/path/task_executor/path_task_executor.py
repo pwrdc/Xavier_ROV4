@@ -45,6 +45,7 @@ class PathTaskExecutor(ITaskExecutor):
             p1 = (int(bb.x1), int(bb.y1))
             p2 = (int(bb.x2), int(bb.y2))
             img = cv2.rectangle(img, p1, p2, (255,0,255))
+            cv2.putText(outlined_image, f"Prob: {bounding_box.p}", (int(bb.x1), int(bb.y1)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100,255,100), 2)
         self.img_server.post("set_img", img, unpickle_result=False)
 
     def find_path(self):

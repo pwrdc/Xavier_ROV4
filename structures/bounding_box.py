@@ -3,10 +3,10 @@ class BoundingBox:
     Class representing a bounding box
     """
 
-    def __init__(self, x=0, y=0, w=0, h=0):
-        self.__update_points(x, y, w, h)
+    def __init__(self, x=0, y=0, w=0, h=0, p=0):
+        self.__update_points(x, y, w, h, p)
 
-    def __update_points(self, x, y, w, h):
+    def __update_points(self, x, y, w, h, p=0):
         """
         Internal use only
         :param x:
@@ -19,6 +19,7 @@ class BoundingBox:
         self.y = y
         self.w = w
         self.h = h
+        self.p = p
 
         # Center - relative coordinates
         self.xc = 2*x - 1
@@ -40,11 +41,12 @@ class BoundingBox:
             "x": self.x,
             "y": self.y,
             "w": self.w,
-            "h": self.h
+            "h": self.h,
+            "p": self.p
         }
 
     @staticmethod
-    def from_points(x1, y1, x2, y2):  # -> BoundingBox
+    def from_points(x1, y1, x2, y2, p=0):  # -> BoundingBox
         """
         Builds a bounding box from 2 points lying on rectangle diagonal
 
@@ -52,6 +54,7 @@ class BoundingBox:
         :param y1: Y coordinate of top left corner
         :param x2: X coordinate of bottom right corner
         :param y2: Y coordinate of bottom right corner
+        :param p: Probability of bounding box (from 0 to 1)
         :return: BoundingBox representing provided rectangle
         """
         x = (x1 + x2) / 2
@@ -105,7 +108,7 @@ class BoundingBox:
             return BoundingBox(x, y, w, h)
 
     def __str__(self):
-        return f"x={self.x}, y={self.y}, w={self.w}, h={self.h},"
+        return f"x={self.x}, y={self.y}, w={self.w}, h={self.h}, p={self.p}"
 
     def mvg_avg(self, new_observation, discount_factor, inplace=False):
         """
@@ -120,6 +123,7 @@ class BoundingBox:
         y = (1 - discount_factor) * new_observation.y + discount_factor * self.y
         w = (1 - discount_factor) * new_observation.w + discount_factor * self.w
         h = (1 - discount_factor) * new_observation.h + discount_factor * self.h
+        p = (1 - discount_factor) * new_observation.p + discount_factor * self.p
 
         if inplace:
             self.__update_points(x,y,w,h)

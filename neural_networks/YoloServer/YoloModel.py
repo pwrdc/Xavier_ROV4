@@ -82,4 +82,4 @@ class YoloModel:
         w = coordinates_pred[2]
         h = coordinates_pred[3]
 
-        return BoundingBox(x, y, w, h)
+        return BoundingBox(x, y, w, h, probs[best_prediction])
