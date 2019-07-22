@@ -107,7 +107,7 @@ class BoundingBox:
     def __str__(self):
         return f"x={self.x}, y={self.y}, w={self.w}, h={self.h},"
 
-    def mvg_avg(self, new_observation: BoundingBox, discount_factor, inplace=False):
+    def mvg_avg(self, new_observation, discount_factor, inplace=False):
         """
         Function used to smooth noisy bounding box observations. 
         :param new_observation: New observation of bounding box that will be incorporated with current one
