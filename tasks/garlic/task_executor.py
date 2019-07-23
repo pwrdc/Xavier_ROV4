@@ -15,3 +15,4 @@ class GarlicTaskExecutor(ITaskExecutor):
     def run(self):
         self.main_logger.log("run GarlicGrabber")
         grab = GrabGarlic(self.control_dict, self.sensors_dict, self.cameras_dict, self.main_logger)
+        grab.run()
