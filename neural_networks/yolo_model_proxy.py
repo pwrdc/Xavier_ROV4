@@ -8,7 +8,8 @@ class YoloModelProxy:
     """
     Class for finding objects in image with Yolo architecture
     """
-    def __init__(self, model_path: str, threshold = 0.5, is_secondary = False, input_tensor_name = "input:0", output_tensor_name = "output:0"):
+    def __init__(self, model_path: str, threshold = 0.5, is_secondary = False, input_tensor_name = "input:0", output_tensor_name = "output:0",
+                detector_type = "yolo"):
         """
         :param model_path: Path to model, relative to project root
         """
@@ -18,6 +19,7 @@ class YoloModelProxy:
         self.port = get_free_port()
         self.input_tensor_name = input_tensor_name
         self.output_tensor_name = output_tensor_name
+        self.type = detector_type
 
     def load(self) -> None:
         """
@@ -29,7 +31,8 @@ class YoloModelProxy:
         # TODO: Add timeout
         self.server_task = PythonRESTSubtask.run("neural_networks/YoloServer/server.py",
                                                  (f"-p {self.port} -m {self.model_path} -t {self.threshold} "
-                                                 f"--input_tensor {self.input_tensor_name} --output_tensor {self.output_tensor_name}")
+                                                 f"--input_tensor {self.input_tensor_name} --output_tensor {self.output_tensor_name} "
+                                                 f"--type {self.type}")
                                                  , port=self.port, wait_ready=True)
 
     def predict(self, image: np.ndarray) -> Optional[BoundingBox]:
