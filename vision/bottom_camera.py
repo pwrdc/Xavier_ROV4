@@ -19,7 +19,7 @@ class BottomCamera(IBaseCamera):
             self.get_img_ref = self.get_simulation_image
         elif mode == 'ROV4':
             self.cap = cv2.VideoCapture(CAMERAS.BOTTOM_CAMERA_NR)
-            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 3)
         elif mode == "ROV3":
             self.get_img_ref = self.get_xiaomi_image
 
@@ -39,7 +39,7 @@ class BottomCamera(IBaseCamera):
 
     def get_hardware_image(self):
         _, frame = self.cap.read()
-        return cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        return frame
 
     def get_xiaomi_image(self):
         raise Exception("Bottom camera not implemented in ROV3")

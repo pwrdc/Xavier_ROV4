@@ -39,7 +39,7 @@ class BumperCamLeft(IBaseCamera):
 
     def get_hardware_image(self):
         _, frame = self.cap.read()
-        return cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        return frame
 
     def get_xiaomi_image(self):
         raise Exception("Bumper camera not implemented in ROV3")

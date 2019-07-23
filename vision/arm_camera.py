@@ -18,7 +18,7 @@ class ArmCamera(IBaseCamera):
         if mode == 'SIMULATION':
             pass
         elif mode == 'ROV4':
-            self.cap = cv2.VideoCapture(CAMERAS.BOTTOM_CAMERA_NR)
+            self.cap = cv2.VideoCapture(CAMERAS.ARM_CAMERA_NR)
             self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         elif mode == "ROV3":
             self.get_img_ref = self.get_xiaomi_image
