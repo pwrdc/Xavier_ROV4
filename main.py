@@ -27,7 +27,7 @@ from tasks.erl_task_scheduler import TaskSchedululer as ErlTaskScheduler
 
 #CHECK MODE
 # TODO - replace with checkoing if is conection to simulation or real rpi
-from definitions import MAINDEF
+from definitions import MAINDEF, CAMERAS
 
 #simulation
 if MAINDEF.MODE == "SIMULATION":
@@ -53,11 +53,11 @@ class Main():
             self.unity_driver = UnityDriver()
 
         # cameras creation
-        self.front_cam1 = FrontCamera1(mode, self.unity_driver)
-        self.bottom_camera = BottomCamera(mode, self.unity_driver)
-        self.arm_camera = ArmCamera(mode, self.unity_driver)
-        self.bumper_cam_right = BumperCamRight(mode, self.unity_driver)
-        self.bumper_cam_left = BumperCamLeft(mode, self.unity_driver)
+        self.front_cam1 = FrontCamera1(mode, self.unity_driver) if CAMERAS.IS_FRONT_CAM_1_ACTIVE else None
+        self.bottom_camera = BottomCamera(mode, self.unity_driver) if CAMERAS.IS_BOTTOM_CAM_ACTIVE else None
+        self.arm_camera = ArmCamera(mode, self.unity_driver) if CAMERAS.IS_ARM_CAM_ACTIVE else None
+        self.bumper_cam_right = BumperCamRight(mode, self.unity_driver) if CAMERAS.IS_BUMPER_CAM_RIGHT_ACTIVE else None
+        self.bumper_cam_left = BumperCamLeft(mode, self.unity_driver) if CAMERAS.IS_BUMPER_CAM_LEFT_ACTIVE else None
         self.logger.log("cameras created")
 
         self.cameras = {'arm_camera': self.arm_camera,
