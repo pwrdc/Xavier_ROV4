@@ -2,7 +2,7 @@
 File contains interface for torpedoes task solver
 """
 from tasks.task_executor_itf import ITaskExecutor
-from tasks.torpedoes.locator import Locator
+from tasks.torpedoes.locator.locator import Locator
 import time
 
 config = {"x_offset": -0.01,  # torpedoes luncher offset x,y in % of camera view
@@ -230,6 +230,6 @@ class TaskExecutor(ITaskExecutor):
             time.sleep(config["refresh_loops_time"])
 
 
-       self.movement_object.pid_set_depth(self.sensors["depth"]+self.torpedo_rev.v_offset())
-       time.sleep(5)
-       self.torpedo_rev.lunch_torpedo()
+        self.movement_object.pid_set_depth(self.sensors["depth"]+self.torpedo_rev.v_offset())
+        time.sleep(5)
+        self.torpedo_rev.lunch_torpedo()

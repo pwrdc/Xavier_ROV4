@@ -8,7 +8,7 @@ CURRENT_DIRECTORY = "tasks/torpedoes/"
 
 
 class HolesDetector():
-    def __init__(self, current_directory= "tasks/torpedoes/"):
+    def __init__(self, current_directory= "tasks/torpedoes/locator/cv_solution/heart_detector/"):
         self.CURRENT_DIRECTORY = current_directory
 
         template = cv2.imread(self.CURRENT_DIRECTORY + 'heart_template.png', cv2.CV_8UC1)
