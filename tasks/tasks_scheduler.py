@@ -1,8 +1,11 @@
 from tasks.task_executor_itf import ITaskExecutor
 
-from tasks.gate.task_executor import TaskExecutor as GateExecutor
+from tasks.gate.task_executor.gate_task_executor import GateTaskExecutor as GateExecutor
+from tasks.path.task_executor.path_task_executor import PathTaskExecutor
+from tasks.path.task_executor.opencv_task_executor import PathTaskExecutor as CVPathTaskExecutor
 from tasks.auto_movements.prequalification import Prequalification
-
+from tasks.casket.task_executor import CasketTaskExecutor
+from tasks.garlic.task_executor import GarlicTaskExecutor
 
 class TaskSchedululer(ITaskExecutor):
 
@@ -27,6 +30,22 @@ class TaskSchedululer(ITaskExecutor):
         This method is started by main object.
         """
         self.logger.log("Task scheduler is running")
-        prequalification = Prequalification(self.control_dict, self.sensors_dict,
-                                            self.cameras_dict, self.logger)
-        prequalification.run()
+        #prequalification = Prequalification(self.control_dict, self.sensors_dict,
+        #                                    self.cameras_dict, self.logger)
+        #prequalification.run()
+
+        #gate_executor = GateExecutor(self.control_dict['movements'], self.sensors_dict,
+        #                             self.cameras_dict, self.logger)
+        #gate_executor.run()
+
+        #path_executor = PathTaskExecutor(self.control_dict['movements'], self.sensors_dict,
+        #                                 self.cameras_dict, self.logger)
+        #path_executor.run()
+
+        garlic_executor = GarlicTaskExecutor(self.control_dict, self.sensors_dict,
+                                             self.cameras_dict, self.logger)
+        garlic_executor.run()
+
+        #casket_executor = CasketTaskExecutor(self.control_dict, self.sensors_dict,
+        #                                     self.cameras_dict, self.logger)
+        #casket_executor.run()
