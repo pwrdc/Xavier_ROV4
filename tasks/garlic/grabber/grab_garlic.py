@@ -10,7 +10,7 @@ class GrabGarlic(ITaskExecutor):
         self.movement = control_dict["movements"]
         self.manipulator = control_dict["manipulator"]
         self.bottom_camera = cameras_dict["bottom_camera"]
-        self.log = main_logger
+        self.log = main_logger.log
 
         self.detector = GarlicDetector()
 
