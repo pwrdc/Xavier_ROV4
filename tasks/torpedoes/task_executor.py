@@ -7,11 +7,12 @@ import time
 
 config = {"x_offset": -0.01,  # torpedoes luncher offset x,y in % of camera view
           "y_offset": -0.2,
+          "v_offset": -10, #v ertival offset of revolver in cm
           "distance": 30,  # distance from ROV to target
           "shoting_distance": 20,
-          "distance_margin": 3,  # m argin for distance +- val
-          "center_margin": 0.1,  # margin for overall object location in camera center 1=100%
-          "shoot_margin": 0.05,  # shoot margin distance % of camera
+          "distance_margin": 2,  # m argin for distance +- val
+          "center_margin": 0.05,  # margin for overall object location in camera center 1=100%
+          "shoot_margin": 0.02,  # shoot margin distance % of camera
           "lin_vel_speeds": 0.3,  # max linear speeds for ROV
           "speed_multiplier": 1,  # value times distance element to center
           "refresh_loops_time": 1  # while loops delay in sec
@@ -22,32 +23,26 @@ class TorpedosRevolver():
     def __init__(self):
         global config
         # offset from center of revolver to torpedos
-        self.rev_config= {1: {"x": -15, "y": -14},
-                        2: {"x": -1, "y": -4},
-                        3: {"x": -15, "y": -14},
-                        4: {"x": -15, "y": -14},
-                        5: {"x": -15, "y": -14},
-                        6: {"x": -15, "y": -14},
-                        }
-
-        self.torpedo_to_lunch = 1
-
-        # add overall torpedo offset from global config
-        for k,v in self.rev_config.items():
-            v["x"]+= config["x_offset"]
-            v["y"]+= config["y_offset"]
+        self.rev_config = {"x": config["x_offset"], "y": config["y_offset"]}
+        self.v_offset = config["v_offset"]
+        self.torpedo_counter = 0
 
     def lunch_torpedo(self):
-        # lunch(self.torpedo_to_lunch)
-        self.torpedo_to_lunch += 1
+        if(self.torpedo_counter < 6):
+            self.torpedo_counter += 1
+            # TODO
+            # lunch()
 
     def get_x_offset(self):
-        val  = self.rev_config[self.torpedo_to_lunch].get("x")
+        val = self.rev_config.get("x")
         return val
 
     def get_y_offset(self):
-        val  = self.rev_config[self.torpedo_to_lunch].get("y")
+        val = self.rev_config.get("y")
         return val
+
+    def get_vertical_offset(self):
+        return self.v_offset
 
 class TaskExecutor(ITaskExecutor):
     """
@@ -55,7 +50,7 @@ class TaskExecutor(ITaskExecutor):
     Every sub-algorithm also implement his interface
     """
 
-    def __init__(self, movement_object, cameras_dict):
+    def __init__(self, movement_object, sensors_dict,cameras_dict):
         """
         @param: movement_object is object of Movements Class
             (repository RPi_ROV4: RPi_ROV4/blob/master/control/movements/movements_itf.py)
@@ -67,6 +62,7 @@ class TaskExecutor(ITaskExecutor):
         self.main_camera = cameras_dict['front_cam1']
         self.locator = Locator()
         self.torpedo_rev = TorpedosRevolver()
+        self.sensors = sensors_dict
 
     def run(self):
         """
@@ -81,8 +77,8 @@ class TaskExecutor(ITaskExecutor):
         # TODO
         # self.setup_lever()
 
-        self.shoot_ellipse()
-        print("Ellipse shooted")
+        # self.shoot_ellipse()
+        # print("Ellipse shooted")
 
     def setup_target(self):
         """
@@ -159,19 +155,20 @@ class TaskExecutor(ITaskExecutor):
             if heart_coords["x"] - self.torpedo_rev.get_x_offset > config["center_margin"]:
                 self.movement_object.set_lin_velocity(right=min(config["lin_vel_speeds"], heart_coords["x"]*config["speed_multiplier"]))
                 requirements["heart_centered_x"] = False
-            elif heart_coords["x"] - self.torpedo_rev.get_x_offset < -config["center_margin"]:
+            elif heart_coords["x"]  - self.torpedo_rev.get_x_offset < -config["center_margin"]:
                 self.movement_object.set_lin_velocity(right=-min(config["lin_vel_speeds"], heart_coords["x"]*config["speed_multiplier"]))
                 requirements["heart_centered_x"] = False
 
-            else:config
+            else:
+                config
                 self.movement_object.set_lin_velocity(right=0)
                 requirements["heart_centered_x"] = True
 
             # Center heart to shoot in Y
-            if heart_coords["y"] - self.torpedo_rev.get_y_offset> config["center_margin"]:
+            if heart_coords["y"] - self.torpedo_rev.get_y_offset > config["center_margin"]:
                 self.movement_object.set_lin_velocity(up=-min(config["lin_vel_speeds"], heart_coords["y"]*config["speed_multiplier"]))
                 requirements["heart_centered_y"] = False
-            elif heart_coords["y"] - self.torpedo_rev.get_y_offset < -config["center_margin"]:
+            elif heart_coords["y"] - self.torpedo_rev.get_y_offset< -config["center_margin"]:
                 self.movement_object.set_lin_velocity(up=min(config["lin_vel_speeds"], heart_coords["y"]*config["speed_multiplier"]))
                 requirements["heart_centered_y"] = False
             else:
@@ -180,7 +177,9 @@ class TaskExecutor(ITaskExecutor):
 
             time.sleep(config["refresh_loops_time"])
 
-            self.torpedo_rev.lunch_torpedo()
+        self.movement_object.pid_set_depth(self.sensors["depth"]+self.torpedo_rev.v_offset())
+        time.sleep(5)
+        self.torpedo_rev.lunch_torpedo()
 
     def shoot_ellipse(self):
         """
@@ -218,7 +217,7 @@ class TaskExecutor(ITaskExecutor):
                 requirements["ellipse_centered_x"] = True
 
             # Center ellipse to shoot in Y
-            if ellipse_coords["y"] - self.torpedo_rev.get_y_offset> config["center_margin"]:
+            if ellipse_coords["y"] - self.torpedo_rev.get_y_offset > config["center_margin"]:
                 self.movement_object.set_lin_velocity(up=-min(config["lin_vel_speeds"], ellipse_coords["y"]*config["speed_multiplier"]))
                 requirements["ellipse_centered_y"] = False
             elif ellipse_coords["y"] - self.torpedo_rev.get_y_offset < -config["center_margin"]:
@@ -230,4 +229,7 @@ class TaskExecutor(ITaskExecutor):
 
             time.sleep(config["refresh_loops_time"])
 
-            self.torpedo_rev.lunch_torpedo()
+
+       self.movement_object.pid_set_depth(self.sensors["depth"]+self.torpedo_rev.v_offset())
+       time.sleep(5)
+       self.torpedo_rev.lunch_torpedo()
