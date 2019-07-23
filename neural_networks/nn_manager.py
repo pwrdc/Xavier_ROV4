@@ -46,7 +46,8 @@ class _NNManagerClass:
                                              YoloModelProxy(model_path=config['path'],
                                                             threshold=config['threshold'],
                                                             input_tensor_name=config['input_tensor'],
-                                                            output_tensor_name=config['output_tensor']))
+                                                            output_tensor_name=config['output_tensor'],
+                                                            detector_type=config['type']))
         self.active_network.network.load()
 
         return self.active_network.network
