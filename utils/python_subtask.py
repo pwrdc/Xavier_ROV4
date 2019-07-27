@@ -1,6 +1,7 @@
 from utils.project_managment import PROJECT_ROOT
 from subprocess import Popen
 from typing import Optional
+import atexit
 
 class PythonSubtask:
     def __init__(self, path: str):
@@ -21,6 +22,7 @@ class PythonSubtask:
         if self.process is None:
             try:
                 self.process = Popen(["python3", "-m", self.path, *arguments.split(" ")], cwd=PROJECT_ROOT)
+                atexit.register(self.process.terminate)
                 return True
             except:
                 return False
@@ -36,7 +38,7 @@ class PythonSubtask:
             self.process = None
 
     @staticmethod
-    def run(path: str, arguments: str): # -> optional[PythonSubtask]
+    def run(path: str, arguments=""): # -> optional[PythonSubtask]
         """
         Factory method for creating and starting a python subtask
         :param path: Path to python script that is run, relative to project root

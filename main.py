@@ -1,6 +1,9 @@
 from logpy.LogPy import Logger
 import threading
 
+# Process running
+from utils.python_subtask import PythonRESTSubtask
+
 #Cameras
 from vision.front_cam_1 import FrontCamera1
 from vision.bottom_camera import BottomCamera
@@ -53,6 +56,7 @@ class Main():
             self.unity_driver = UnityDriver()
 
         # cameras creation
+        PythonTask.run("vision/camera_server.py")
         self.front_cam1 = FrontCamera1(mode, self.unity_driver) if CAMERAS.IS_FRONT_CAM_1_ACTIVE else None
         self.bottom_camera = BottomCamera(mode, self.unity_driver) if CAMERAS.IS_BOTTOM_CAM_ACTIVE else None
         self.arm_camera = ArmCamera(mode, self.unity_driver) if CAMERAS.IS_ARM_CAM_ACTIVE else None
