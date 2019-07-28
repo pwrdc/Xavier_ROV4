@@ -4,7 +4,7 @@ from tasks.path.locator.ml_solution.yolo_soln import YoloPathLocator
 from tasks.path.locator.cv_solution.barbarian_locator import BarbarianLocator
 from utils.stopwatch import Stopwatch
 from structures.bounding_box import BoundingBox
-from utils.config import get_config
+from configs.config import get_config
 import cv2
 from utils.python_rest_subtask import PythonRESTSubtask
 
@@ -14,7 +14,7 @@ class PathTaskExecutor(ITaskExecutor):
         self._bottom_camera = cameras_dict['bottom_camera']
         self._bounding_box = BoundingBox(0, 0, 0, 0)
         self._logger = main_logger
-        self.config = get_config()['path_task']
+        self.config = get_config("tasks")['path_task']
         self.img_server = PythonRESTSubtask("utils/img_server.py", 6669)
         self.img_server.start()
         # For which path we are taking angle. For each path, rotation 
@@ -45,7 +45,7 @@ class PathTaskExecutor(ITaskExecutor):
             p1 = (int(bb.x1), int(bb.y1))
             p2 = (int(bb.x2), int(bb.y2))
             img = cv2.rectangle(img, p1, p2, (255,0,255))
-            cv2.putText(outlined_image, f"Prob: {bounding_box.p}", (int(bb.x1), int(bb.y1)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100,255,100), 2)
+            cv2.putText(img, f"Prob: {bounding_box.p}", (int(bb.x1), int(bb.y1)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100,255,100), 2)
         self.img_server.post("set_img", img, unpickle_result=False)
 
     def find_path(self):

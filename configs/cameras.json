@@ -1,0 +1,47 @@
+{
+    "server_port": 9231,
+    "interframe_sleep": 0.033,
+    "hostname": "localhost",
+    "cameras": {
+        "front": {
+            "active": true,
+            "id": 0,
+            "debug": true,
+            "debug_path": "videos/test.mp4",
+            "recording": false,
+            "recording_path": "videos/rec_front_cam.mp4"
+        },
+        "bottom": {
+            "active": true,
+            "id": 1,
+            "debug": true,
+            "debug_path": "videos/test.mp4",
+            "recording": false,
+            "recording_path": "videos/rec_bottom_cam.mp4"
+        },
+        "arm": {
+            "active": false,
+            "id": 2,
+            "debug": true,
+            "debug_path": "videos/test.mp4",
+            "recording": false,
+            "recording_path": "videos/rec_arm_cam.mp4"
+        },
+        "bumper_left": {
+            "active": false,
+            "id": 3,
+            "debug": true,
+            "debug_path": "videos/test.mp4",
+            "recording": false,
+            "recording_path": "videos/rec_lbumper_cam.mp4"
+        },
+        "bumper_right": {
+            "active": false,
+            "id": 4,
+            "debug": true,
+            "debug_path": "videos/test.mp4",
+            "recording": false,
+            "recording_path": "videos/rec_rbumpler_cam.mp4"
+        }
+    }
+}

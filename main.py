@@ -1,12 +1,11 @@
 from logpy.LogPy import Logger
 import threading
 
-#Cameras
-from vision.front_cam_1 import FrontCamera1
-from vision.bottom_camera import BottomCamera
-from vision.arm_camera import ArmCamera
-from vision.bumper_cam_right import BumperCamRight
-from vision.bumper_cam_left import BumperCamLeft
+# Cameras
+from vision.camera import Camera
+
+# Task running
+from utils.python_subtask import PythonSubtask
 
 # Sensors
 from communication.communication import Communication
@@ -53,12 +52,13 @@ class Main():
             self.unity_driver = UnityDriver()
 
         # cameras creation
-        self.front_cam1 = FrontCamera1(mode, self.unity_driver) if CAMERAS.IS_FRONT_CAM_1_ACTIVE else None
-        self.bottom_camera = BottomCamera(mode, self.unity_driver) if CAMERAS.IS_BOTTOM_CAM_ACTIVE else None
-        self.arm_camera = ArmCamera(mode, self.unity_driver) if CAMERAS.IS_ARM_CAM_ACTIVE else None
-        self.bumper_cam_right = BumperCamRight(mode, self.unity_driver) if CAMERAS.IS_BUMPER_CAM_RIGHT_ACTIVE else None
-        self.bumper_cam_left = BumperCamLeft(mode, self.unity_driver) if CAMERAS.IS_BUMPER_CAM_LEFT_ACTIVE else None
-        self.logger.log("cameras created")
+        PythonSubtask.run("vision/camera_server.py")
+        self.front_cam1 = Camera("front", mode, self.unity_driver)
+        self.bottom_camera = Camera("bottom", mode, self.unity_driver)
+        self.arm_camera = Camera("arm", mode, self.unity_driver)
+        self.bumper_cam_right = Camera("bumper_right", mode, self.unity_driver)
+        self.bumper_cam_left = Camera("bumper_left", mode, self.unity_driver)
+        self.logger.log("Cameras created")
 
         self.cameras = {'arm_camera': self.arm_camera,
                         'bottom_camera': self.bottom_camera,
@@ -98,7 +98,7 @@ class Main():
             self.logger.log("ERL task scheduler created")
         else:
             self.task_scheduler = TaskSchedululer(self.control, self.sensors, self.cameras, self.logger)
-            self.logger.log("task scheduler created")
+            self.logger.log("Robosub task scheduler created")
 
     def run(self):
         self.logger.log("main thread is running")

@@ -4,7 +4,7 @@ from tasks.gate.locator.ml_solution.yolo_soln import YoloGateLocator
 from utils.stopwatch import Stopwatch
 from structures.bounding_box import BoundingBox
 from utils.signal_processing import mvg_avg
-from utils.config import get_config
+from configs.config import get_config
 from time import sleep
 import cv2
 
@@ -16,7 +16,7 @@ class GateTaskExecutor(ITaskExecutor):
         self._front_camera = cameras_dict['front_cam1']
         self._bounding_box = BoundingBox(0, 0, 0, 0)
         self._logger = main_logger
-        self.config = get_config()['gate_task']
+        self.config = get_config("tasks")['gate_task']
         self.img_server = PythonRESTSubtask("utils/img_server.py", 6669)
         self.img_server.start()
         # For which path we are taking angle. For each path, rotation 
