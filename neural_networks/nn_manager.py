@@ -12,7 +12,7 @@ class _NNManagerClass:
         self.active_network: Optional[_ActiveNetwork] = None
         self.secondary_network: Optional[_ActiveNetwork] = None
 
-        with open("models/models.json", "r") as f:
+        with open("configs/models.json", "r") as f:
             self.config = json.load(f)
 
     def get_yolo_model(self, name) -> Optional[YoloModelProxy]:

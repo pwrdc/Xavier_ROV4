@@ -38,8 +38,5 @@
             "max_engine_power": 10,
             "go_time_seconds": 5
         }
-    },
-    "camera_server": {
-        "port": 5775
     }
 }

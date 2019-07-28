@@ -7,7 +7,7 @@
         "type": "yolo"
     },
     "path": {
-        "path": "models/modelYOLO_path",
+        "path": "models/modelYOLO2_path",
         "input_tensor": "input:0",
         "output_tensor": "output/Sigmoid:0",
         "threshold": 0.5,
