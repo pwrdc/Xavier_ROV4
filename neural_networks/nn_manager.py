@@ -72,4 +72,13 @@ class _NNManagerClass:
 
         return self.secondary_network.network
 
+    def release(self):
+        if self.active_network is not None:
+            self.active_network.network.release()
+            self.active_network = None
+
+        if self.secondary_network is not None:
+            self.secondary_network.network.release()
+            self.secondary_network = None
+
 NNManager = _NNManagerClass()
