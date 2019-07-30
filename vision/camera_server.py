@@ -38,7 +38,9 @@ class ImageAquisition(Thread):
         self.cameras_config = config["cameras"]
 
         for camera_name, camera_config in self.cameras_config.items():
-            if camera_config["debug"] == False:
+            if camera_config["active"] == False:
+                continue
+            elif camera_config["debug"] == False:
                 self.cameras[camera_name] = cv2.VideoCapture(int(camera_config["id"])) # Use physical camera
             else:
                 self.cameras[camera_name] = cv2.VideoCapture(camera_config["debug_path"]) # Use video as camera input
