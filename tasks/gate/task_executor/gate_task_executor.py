@@ -4,6 +4,7 @@ from tasks.gate.locator.ml_solution.yolo_soln import YoloGateLocator
 from utils.stopwatch import Stopwatch
 from structures.bounding_box import BoundingBox
 from utils.signal_processing import mvg_avg
+from neural_networks.utils import extract_prediction
 from configs.config import get_config
 from time import sleep
 import cv2
@@ -17,8 +18,6 @@ class GateTaskExecutor(ITaskExecutor):
         self._bounding_box = BoundingBox(0, 0, 0, 0)
         self._logger = main_logger
         self.config = get_config("tasks")['gate_task']
-        self.img_server = PythonRESTSubtask("utils/img_server.py", 6669)
-        self.img_server.start()
         # For which path we are taking angle. For each path, rotation 
         # angle might be set differently in config.json
         self.number = 0
@@ -43,16 +42,6 @@ class GateTaskExecutor(ITaskExecutor):
 
         return 1
 
-    def post_image(self, img, bounding_box = None):
-        if bounding_box is not None:
-            self.img_server.post("set_img", img, unpickle_result=False)
-            bb = bounding_box.denormalize(img.shape[1], img.shape[0])
-            p1 = (int(bb.x1), int(bb.y1))
-            p2 = (int(bb.x2), int(bb.y2))
-            img = cv2.rectangle(img, p1, p2, (255,0,255))
-        self._logger.log("img posted")
-        self.img_server.post("set_img", img, unpickle_result=False)
-
     def find_gate(self):
         self._logger.log("finding the gate")
         config = self.config['search']
@@ -69,9 +58,7 @@ class GateTaskExecutor(ITaskExecutor):
 
         while(True):
             img = self._front_camera.get_image()
-            bounding_box = YoloGateLocator().get_gate_bounding_box(img)
-            self.post_image(img, bounding_box)
-
+            bounding_box = extract_prediction(YoloGateLocator().get_gate_bounding_box(img), "path")
             confidence = 0
 
             if bounding_box is not None:
@@ -103,8 +90,7 @@ class GateTaskExecutor(ITaskExecutor):
 
         while(True):
             img = self._front_camera.get_image()
-            bounding_box = YoloGateLocator().get_gate_bounding_box(img)
-            self.post_image(img, bounding_box)
+            bounding_box = extract_prediction(YoloGateLocator().get_gate_bounding_box(img), "path")
 
             # Try again if yolo did not return a box
             # TODO: Maybe go back?

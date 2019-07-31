@@ -2,11 +2,13 @@ from tasks.task_executor_itf import ITaskExecutor, Cameras
 from communication.rpi_broker.movements import Movements
 from tasks.path.locator.ml_solution.yolo_soln import YoloPathLocator
 from tasks.path.locator.cv_solution.barbarian_locator import BarbarianLocator
+from neural_networks.utils import extract_prediction
 from utils.stopwatch import Stopwatch
 from structures.bounding_box import BoundingBox
 from configs.config import get_config
 import cv2
 from utils.python_rest_subtask import PythonRESTSubtask
+from vision.camera_server import set_bb
 
 class PathTaskExecutor(ITaskExecutor):
     def __init__(self, contorl_dict: Movements, sensors_dict, cameras_dict: Cameras, main_logger):
@@ -15,8 +17,6 @@ class PathTaskExecutor(ITaskExecutor):
         self._bounding_box = BoundingBox(0, 0, 0, 0)
         self._logger = main_logger
         self.config = get_config("tasks")['path_task']
-        self.img_server = PythonRESTSubtask("utils/img_server.py", 6669)
-        self.img_server.start()
         # For which path we are taking angle. For each path, rotation 
         # angle might be set differently in cnfig.json
         self.number = 0
@@ -38,16 +38,6 @@ class PathTaskExecutor(ITaskExecutor):
 
         return 1
 
-    def post_image(self, img, bounding_box = None):
-        if bounding_box is not None:
-            self.img_server.post("set_img", img, unpickle_result=False)
-            bb = bounding_box.denormalize(img.shape[1], img.shape[0])
-            p1 = (int(bb.x1), int(bb.y1))
-            p2 = (int(bb.x2), int(bb.y2))
-            img = cv2.rectangle(img, p1, p2, (255,0,255))
-            cv2.putText(img, f"Prob: {bounding_box.p}", (int(bb.x1), int(bb.y1)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100,255,100), 2)
-        self.img_server.post("set_img", img, unpickle_result=False)
-
     def find_path(self):
         config = self.config['search']
         ENGINE_POWER = config['max_engine_power']
@@ -65,8 +55,8 @@ class PathTaskExecutor(ITaskExecutor):
 
         while(True):
             img = self._bottom_camera.get_image()
-            bounding_box = BarbarianLocator().get_path_bounding_box(img)
-            self.post_image(img, bounding_box)
+            bounding_box = extract_prediction(YoloPathLocator().get_gate_bounding_box(img), "path")            
+            set_bb(bounding_box)
 
             if bounding_box is not None:
                 mvg_average = (1 - MOVING_AVERAGE_DISCOUNT) + MOVING_AVERAGE_DISCOUNT * mvg_average
@@ -84,7 +74,6 @@ class PathTaskExecutor(ITaskExecutor):
                 p2 = (int(bb.x2), int(bb.y2))
 
                 img = cv2.rectangle(img, p1, p2, (255,0,255))
-                cv2.imwrite("PATH_SEARCH.png", img)
 
                 return True 
 
@@ -105,9 +94,9 @@ class PathTaskExecutor(ITaskExecutor):
 
         while(True):
             img = self._bottom_camera.get_image()
-            bounding_box = BarbarianLocator().get_path_bounding_box(img)
-            self.post_image(img, bounding_box)
-
+            bounding_box = extract_prediction(YoloPathLocator().get_gate_bounding_box(img), "path")            
+            set_bb(bounding_box)
+            
             # Try again if yolo did not return a box
             # TODO: Maybe go back?
             if bounding_box is None:

@@ -19,16 +19,16 @@ class Camera(IBaseCamera):
 
         if mode == 'SIMULATION':
             self.get_img_ref = self.get_simulation_image
-        elif mode == 'ROV4':
+        elif mode == 'ROV4_OLD':
             self.cap = cv2.VideoCapture(self.config["id"])
             self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 3)
         elif mode == "ROV3":
             self.get_img_ref = self.get_xiaomi_image
-        elif mode == "ROV4_SERVER":
+        elif mode == "ROV4":
             self.get_img_ref = self.get_server_image
 
     def __del__(self):
-        if self.mode == 'ROV4':
+        if self.mode == 'ROV4_OLD':
             self.cap.release()
 
     def get_image(self):

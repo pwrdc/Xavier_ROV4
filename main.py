@@ -51,8 +51,8 @@ class Main():
         if mode == "SIMULATION":
             self.unity_driver = UnityDriver()
 
-        # cameras creation
-        PythonSubtask.run("vision/camera_server.py")
+        # cameras 
+        camera_process = PythonSubtask.run("vision/camera_server.py")
         self.front_cam1 = Camera("front", mode, self.unity_driver)
         self.bottom_camera = Camera("bottom", mode, self.unity_driver)
         self.arm_camera = Camera("arm", mode, self.unity_driver)

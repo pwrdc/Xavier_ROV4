@@ -20,9 +20,9 @@ class Prequalification(ITaskExecutor):
 
     def run(self):
         default_depth = 1.3
-        time_surface = 5
-        time_move_front = 60
-        time_short_mov_front = 5
+        time_surface = 4
+        time_move_front = 20
+        time_short_mov_front = 0
         
         time.sleep(2)
 
@@ -54,7 +54,7 @@ class Prequalification(ITaskExecutor):
         # short front
         #self.movements.pid_yaw_turn_on()
         self.logger.log("Pre-qualification: move front - short")
-        self.movements.set_lin_velocity(front=30)
+        self.movements.set_lin_velocity(front=25)
         time.sleep(time_short_mov_front)
         self.movements.set_lin_velocity()
 
@@ -71,8 +71,8 @@ class Prequalification(ITaskExecutor):
         # second long front
         time.sleep(1)
         self.logger.log("Pre-qualification: second move front")
-        self.movements.set_lin_velocity(front=30)
-        time.sleep(time_move_front-2)
+        self.movements.set_lin_velocity(front=25)
+        time.sleep(time_move_front)
         self.movements.set_lin_velocity()
 
         # surface

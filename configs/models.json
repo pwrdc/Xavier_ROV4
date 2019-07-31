@@ -7,10 +7,10 @@
         "type": "yolo"
     },
     "path": {
-        "path": "models/modelYOLO2_path",
+        "path": "models/model_darknet",
         "input_tensor": "input:0",
         "output_tensor": "output/Sigmoid:0",
         "threshold": 0.5,
-        "type": "yolo"
+        "type": "darknet"
     }
 }

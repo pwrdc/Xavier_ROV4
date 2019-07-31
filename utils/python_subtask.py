@@ -2,6 +2,7 @@ from utils.project_managment import PROJECT_ROOT
 from subprocess import Popen
 from typing import Optional
 import atexit
+import sys
 
 class PythonSubtask:
     def __init__(self, path: str):
@@ -21,10 +22,12 @@ class PythonSubtask:
         """
         if self.process is None:
             try:
-                self.process = Popen(["python3", "-m", self.path, *arguments.split(" ")], cwd=PROJECT_ROOT)
+                self.process = Popen(f"python3 -m {self.path} {arguments}", cwd=PROJECT_ROOT, shell=True)
                 atexit.register(self.process.terminate)
                 return True
-            except:
+            except Exception as e:
+                print("Task starting problem")
+                print(e)
                 return False
 
     def kill(self):
@@ -48,8 +51,10 @@ class PythonSubtask:
         task = PythonSubtask(path)
 
         if task.start(arguments):
+            print ("task starter")
             return task
         else:
+            print("task not started")
             return None
 
     def __del__(self):

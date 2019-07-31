@@ -3,10 +3,10 @@ class BoundingBox:
     Class representing a bounding box
     """
 
-    def __init__(self, x=0, y=0, w=0, h=0, p=0):
-        self.__update_points(x, y, w, h, p)
+    def __init__(self, x=0, y=0, w=0, h=0, p=0, detected_item=None):
+        self.__update_points(x, y, w, h, p, detected_item)
 
-    def __update_points(self, x, y, w, h, p=0):
+    def __update_points(self, x, y, w, h, p, detected_item):
         """
         Internal use only
         :param x:
@@ -25,7 +25,6 @@ class BoundingBox:
         self.xc = 2*x - 1
         self.yc = 2*y - 1
 
-
         # Diagonal coordinates
         self.x1 = x - w/2
         self.x2 = x + w/2
@@ -35,6 +34,8 @@ class BoundingBox:
         # Points with diagonal coordinates
         self.p1 = (self.x1, self.y1)
         self.p2 = (self.x2, self.y2)
+
+        self.detected_item = detected_item
 
     def to_dict(self):
         return {
@@ -46,7 +47,7 @@ class BoundingBox:
         }
 
     @staticmethod
-    def from_points(x1, y1, x2, y2, p=0):  # -> BoundingBox
+    def from_points(x1, y1, x2, y2, p=0, detected_item=None):  # -> BoundingBox
         """
         Builds a bounding box from 2 points lying on rectangle diagonal
 
@@ -62,7 +63,7 @@ class BoundingBox:
         w = x2 - x1
         h = y2 - y1
 
-        return BoundingBox(x, y, w, h)
+        return BoundingBox(x, y, w, h, self.p, self.detected_item)
 
     def normalize(self, img_width, img_height, inplace=False):  # -> BoundingBox
         """
@@ -80,11 +81,11 @@ class BoundingBox:
         h = self.h / img_height
 
         if inplace:
-            self.__update_points(x, y, w, h)
+            self.__update_points(x, y, w, h, self.p, self.detected_item)
 
             return self
         else:
-            return BoundingBox(x, y, w, h)
+            return BoundingBox(x, y, w, h, self.p, self.detected_item)
 
     def denormalize(self, img_width, img_height, inplace=False):  # -> BoundingBox
         """
@@ -102,13 +103,13 @@ class BoundingBox:
         h = self.h * img_height
 
         if inplace:
-            self.__update_points(x, y, w, h)
+            self.__update_points(x, y, w, h, self.p, self.detected_item)
             return self
         else:
-            return BoundingBox(x, y, w, h)
+            return BoundingBox(x, y, w, h, self.p, self.detected_item)
 
     def __str__(self):
-        return f"x={self.x}, y={self.y}, w={self.w}, h={self.h}, p={self.p}"
+        return f"x={self.x}, y={self.y}, w={self.w}, h={self.h}, p={self.p}, item={self.detected_item}"
 
     def mvg_avg(self, new_observation, discount_factor, inplace=False):
         """
@@ -126,10 +127,10 @@ class BoundingBox:
         p = (1 - discount_factor) * new_observation.p + discount_factor * self.p
 
         if inplace:
-            self.__update_points(x,y,w,h)
+            self.__update_points(x,y,w,h,p, self.detected_item)
             return self
         else:
-            return BoundingBox(x,y,w,h)
+            return BoundingBox(x,y,w,h,p, self.detected_item)
 
 
 if __name__ == "__main__":

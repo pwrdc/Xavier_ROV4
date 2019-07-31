@@ -35,7 +35,7 @@ class YoloModelProxy:
                                                  f"--type {self.type}")
                                                  , port=self.port, wait_ready=True)
 
-    def predict(self, image: np.ndarray) -> Optional[BoundingBox]:
+    def predict(self, image: np.ndarray) -> [BoundingBox]:
         """
         Finds object on an image
         :param image: np.array representing RGB image with values from 0 to 255
@@ -45,7 +45,9 @@ class YoloModelProxy:
         if self.server_task is None:
             return None
 
-        return self.server_task.post("predict", image)
+        result = self.server_task.post("predict", image)
+
+        return result
 
     def is_active(self) -> bool:
         if self.server_task is None:

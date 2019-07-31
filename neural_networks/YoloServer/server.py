@@ -27,6 +27,7 @@ if __name__ == "__main__":
         model = YoloModel(f"{PROJECT_ROOT}/{args.model}", prediction_tensor_name=args.output_tensor,
                         input_tensor_name=args.input_tensor, threshold=args.threshold)
     elif args.type == "darknet":
+        print("DARKNET")
         model = DarknetYoloModel(f"{PROJECT_ROOT}/{args.model}")
 
     model.load()

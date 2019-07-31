@@ -1,17 +1,22 @@
 from neural_networks.yolo_model_proxy import YoloModelProxy
-import time
+from utils.stopwatch import Stopwatch
 from tests.utils.prepare_test_yolo import prepare_test_yolo
+import argparse
+from neural_networks.nn_manager import NNManager
 
+parser = argparse.ArgumentParser(description='Tests of Yolo Neural Network model')
+parser.add_argument("model", type=str, help="Model name")
+args = parser.parse_args()
+
+MODEL_NAME = args.model
 
 if __name__ == "__main__":
-    prepare_test_yolo()
+    stopwatch = Stopwatch()
+    NNManager.get_yolo_model(MODEL_NAME)
 
-    model = YoloModelProxy("tests/resources/yolo/yolo_test_model")
+    stopwatch.start()
+    NNManager.release()
+    model = NNManager.get_yolo_model(MODEL_NAME)
+    time = stopwatch.stop()
 
-    model.load()
-    start = time.time()
-    model.release()
-    model.load()
-    end = time.time()
-
-    print(f"Switching models takes {end - start} seconds")
+    print(f"Switching models takes {time} seconds")

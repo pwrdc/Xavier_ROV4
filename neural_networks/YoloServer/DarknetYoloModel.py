@@ -35,14 +35,26 @@ class DarknetYoloModel:
         self.net = load_net(cfg_path, weights_path, 0)
         self.meta = load_meta(meta_path)
 
+    def _get_num_classes(self):
+        names_path = f"{self.model_path}/yolo.names".encode('UTF-8')
+        num_lines = 0
+
+        with open(names_path, "r") as f:
+            lines = f.readlines()
+        for line in lines:
+            if not line.isspace():
+                num_lines = num_lines + 1
+
+        return num_lines
+
     def _create_meta(self):
         with open(f"{self.model_path}/yolo.data", "w") as f:
-            f.write("classes=80\n")
+            f.write(f"classes={self._get_num_classes()}\n")
             f.write("train=fake\n")
             f.write("valid=fake\n")
             f.write(f"names={self.model_path}/yolo.names\n")
 
-    def predict(self, image: np.ndarray) -> BoundingBox:
+    def predict(self, image: np.ndarray) -> [BoundingBox]:
         """
         Finds object on an image
         :param image: np.array representing RGB image with values from 0 to 255
@@ -51,18 +63,23 @@ class DarknetYoloModel:
         """
         #image = cv2.resize(image, (self.img_width, self.img_height))
         print(image.shape)
-        result = detect(self.net, self.meta, image)
+        results = detect(self.net, self.meta, image)
 
-        print("Detection result", result)
+        detections = []
 
-        if len(result) == 0:
-            return None
+        if len(results) == 0:
+            return detections
 
-        position = result[0][2]
+        for result in results:
+            detection = str(result[0])
+            probability = result[1]
+            position = result[2]
 
-        x = position[0] / self.img_width
-        y = position[1] / self.img_height
-        w = position[2] / self.img_width
-        h = position[3] / self.img_height        
+            x = position[0] / self.img_width
+            y = position[1] / self.img_height
+            w = position[2] / self.img_width
+            h = position[3] / self.img_height        
 
-        return BoundingBox(x,y,w,h)
+            detections.append(BoundingBox(x,y,w,h,probability,detection))
+
+        return detections

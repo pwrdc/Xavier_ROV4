@@ -30,9 +30,9 @@ class TaskSchedululer(ITaskExecutor):
         This method is started by main object.
         """
         self.logger.log("Task scheduler is running")
-        #prequalification = Prequalification(self.control_dict, self.sensors_dict,
-        #                                    self.cameras_dict, self.logger)
-        #prequalification.run()
+        prequalification = Prequalification(self.control_dict, self.sensors_dict,
+                                            self.cameras_dict, self.logger)
+        prequalification.run()
 
         #gate_executor = GateExecutor(self.control_dict['movements'], self.sensors_dict,
         #                             self.cameras_dict, self.logger)
@@ -42,9 +42,9 @@ class TaskSchedululer(ITaskExecutor):
         #                                 self.cameras_dict, self.logger)
         #path_executor.run()
 
-        garlic_executor = GarlicTaskExecutor(self.control_dict, self.sensors_dict,
-                                             self.cameras_dict, self.logger)
-        garlic_executor.run()
+        #garlic_executor = GarlicTaskExecutor(self.control_dict, self.sensors_dict,
+        #                                     self.cameras_dict, self.logger)
+        #garlic_executor.run()
 
         #casket_executor = CasketTaskExecutor(self.control_dict, self.sensors_dict,
         #                                     self.cameras_dict, self.logger)

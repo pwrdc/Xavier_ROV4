@@ -33,13 +33,13 @@ print(PROJECT_ROOT)
 MODEL = NNManager.get_yolo_model(SELECTED_MODEL)
 
 def predict(img):
-    results = MODEL.predict(img)
+    result = MODEL.predict(img)
+    print(result)
 
-    if len(results) > 0:
-        for result in results:
-            result.denormalize(img.shape[1], img.shape[0], inplace=True)
+    if result is not None:
+        result.denormalize(img.shape[1], img.shape[0], inplace=True)
 
-    return results
+    return result
 
 def prediction_text(img):
     result = predict(img)
@@ -48,15 +48,13 @@ def prediction_text(img):
     print(result)
 
 def prediction_img(img, wait_time=0):
-    predictions = predict(img)
+    prediction = predict(img)
 
-    if len(predictions) > 0:
-        for prediction in predictions:
-            p1 = (int(prediction.x1), int(prediction.y1))
-            p2 = (int(prediction.x2), int(prediction.y2))
+    if prediction is not None:
+        p1 = (int(prediction.x1), int(prediction.y1))
+        p2 = (int(prediction.x2), int(prediction.y2))
 
-            img = cv2.rectangle(img, p1, p2, (255,0,255))
-
+        img = cv2.rectangle(img, p1, p2, (255,0,255))
     cv2.imshow('image', img)
     cv2.waitKey(wait_time)
 

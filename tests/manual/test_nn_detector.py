@@ -18,6 +18,7 @@ if __name__ == '__main__':
     parser.add_argument("-v", "--visualize", action="store_true", help="Show output of neural network on an image")
     parser.add_argument("-n", "--name", default=MODEL_PATH, help="Model name")
     parser.add_argument("-i", "--image", default=IMG_PATH, help="Path to image on which visualization will be made")
+    parser.add_argument("--video", type=str, required=False, help="Path to video file on which visualization will be made")
     args = parser.parse_args()
 
     if args.visualize:
@@ -27,6 +28,7 @@ if __name__ == '__main__':
     MODEL_NAME = args.name
     SELECTED_IMAGE_PATH=args.image
     VISUALIZE_OUTPUT = args.visualize
+    VIDEO = args.video
 
     img = cv2.imread(SELECTED_IMAGE_PATH)
     prediction = NNManager.get_yolo_model(args.name).predict(img)

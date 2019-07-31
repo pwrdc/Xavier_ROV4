@@ -4,8 +4,8 @@ from collections import namedtuple
 import json
 from utils.logging import Log, LogType
 class _ActiveNetwork:
-    def __init__(self, name: str, network: YoloModelProxy):
-        self.name = name
+    def __init__(self, path: str, network: YoloModelProxy):
+        self.path = path
         self.network = network
 class _NNManagerClass:
     def __init__(self):
@@ -16,8 +16,10 @@ class _NNManagerClass:
             self.config = json.load(f)
 
     def get_yolo_model(self, name) -> Optional[YoloModelProxy]:
+        path = self.config[name]['path']
+
         if self.active_network is not None:
-            if self.active_network.name == name:
+            if self.active_network.path == path:
                 return self.active_network.network
 
         if not name in self.config:
@@ -54,8 +56,10 @@ class _NNManagerClass:
 
 
     def get_secondary_yolo_model(self, name):
+        path = self.config[name]['path']
+
         if self.secondary_network is not None:
-            if self.secondary_network.name == name:
+            if self.secondary_network.path == path:
                 return
 
         config = self.config[name]
@@ -71,5 +75,14 @@ class _NNManagerClass:
         self.secondary_network.network.load()
 
         return self.secondary_network.network
+
+    def release(self):
+        if self.active_network is not None:
+            self.active_network.network.release()
+            self.active_network = None
+
+        if self.secondary_network is not None:
+            self.secondary_network.network.release()
+            self.secondary_network = None
 
 NNManager = _NNManagerClass()
