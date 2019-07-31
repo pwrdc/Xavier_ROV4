@@ -1,0 +1,60 @@
+from tasks.buoys.locator.locator_itf import ILocator
+
+class Locator(ILocator):
+    """
+    Interfce for buoys locator
+    """
+    def get_jiangshi_coordinates(self, image):
+        """
+        Method for getting cordinates of jiangshi buoy
+        @param: image captured from camera, standard openCV type
+        :return: dictionary with x,y cordinates of path in relative to centre of camera (0,0)
+            values are floats in the range [-1, 1], where -1 is max left of max down cordinate,
+            0 is centre, 0.5 is halfway between 0 anf max right or up etc.
+            example: {"x":0.4, "y":0.5}
+        """
+        return {"x":1,"y":1}
+
+    def get_rectangle_coordinates(self, image):
+        """
+        Method for getting cordinates of whole rectangle buoy
+        @param: image captured from camera, standard openCV type
+        :return: dictionary with x,y cordinates of path in relative to centre of camera (0,0)
+            values are floats in the range [-1, 1], where -1 is max left of max down cordinate,
+            0 is centre, 0.5 is halfway between 0 anf max right or up etc.
+            example: {"x":0.4, "y":0.5}
+        """
+        return {"x":1,"y":1}
+    
+    def get_draugr_wall_coordinates(self, image):
+        """
+        Method for getting cordinates of Draugr wall-buoy
+        @param: image captured from camera, standard openCV type
+        :return: dictionary with x,y cordinates of path in relative to centre of camera (0,0)
+            values are floats in the range [-1, 1], where -1 is max left of max down cordinate,
+            0 is centre, 0.5 is halfway between 0 anf max right or up etc.
+            example: {"x":0.4, "y":0.5}
+        """
+        pass
+
+    def get_aswang_wall_coordinates(self, image):
+        """
+        Method for getting cordinates of aswang wall-buoy
+        @param: image captured from camera, standard openCV type
+        :return: dictionary with x,y cordinates of path in relative to centre of camera (0,0)
+            values are floats in the range [-1, 1], where -1 is max left of max down cordinate,
+            0 is centre, 0.5 is halfway between 0 anf max right or up etc.
+            example: {"x":0.4, "y":0.5}
+        """
+        pass
+
+    def get_vetalas_wall_coordinates(self, image):
+        """
+        Method for getting cordinates of vetalas wall-buoy
+        @param: image captured from camera, standard openCV type
+        :return: dictionary with x,y cordinates of path in relative to centre of camera (0,0)
+            values are floats in the range [-1, 1], where -1 is max left of max down cordinate,
+            0 is centre, 0.5 is halfway between 0 anf max right or up etc.
+            example: {"x":0.4, "y":0.5}
+        """
+        pass
