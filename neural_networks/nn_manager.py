@@ -44,12 +44,17 @@ class _NNManagerClass:
                 Log(LogType.ERROR, f"{param} value not found int models.json!")
                 exit(-1)
 
-        self.active_network = _ActiveNetwork(name,
+        object = ""
+        if config['type'] == "yolo":
+            object = config['object']
+
+        self.active_network = _ActiveNetwork(path,
                                              YoloModelProxy(model_path=config['path'],
                                                             threshold=config['threshold'],
                                                             input_tensor_name=config['input_tensor'],
                                                             output_tensor_name=config['output_tensor'],
-                                                            detector_type=config['type']))
+                                                            detector_type=config['type'],
+                                                            object=object))
         self.active_network.network.load()
 
         return self.active_network.network

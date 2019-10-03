@@ -19,6 +19,7 @@ from communication.rpi_broker.distance import DistanceSensor
 from communication.rpi_broker.movements import Movements
 from communication.rpi_broker.torpedoes import Torpedoes
 from communication.rpi_broker.manipulator import Manipulator
+from communication.rpi_broker.dropper import Dropper
 
 #Task sceduller
 from tasks.tasks_scheduler import TaskSchedululer
@@ -52,7 +53,7 @@ class Main():
             self.unity_driver = UnityDriver()
 
         # cameras 
-        camera_process = PythonSubtask.run("vision/camera_server.py")
+#        camera_process = PythonSubtask.run("vision/camera_server.py")
         self.front_cam1 = Camera("front", mode, self.unity_driver)
         self.bottom_camera = Camera("bottom", mode, self.unity_driver)
         self.arm_camera = Camera("arm", mode, self.unity_driver)
@@ -86,11 +87,13 @@ class Main():
         self.movements = Movements(self.rpi_reference)
         self.torpedoes = Torpedoes(self.rpi_reference)
         self.manipulator = Manipulator(self.rpi_reference)
+        self.dropper = Dropper(self.rpi_reference)
         self.logger.log("control objects created")
 
         self.control = {'movements': self.movements,
                         'torpedoes': self.torpedoes,
-                        'manipulator': self.manipulator}
+                        'manipulator': self.manipulator,
+                        'dropper': self.dropper}
 
         # task sheduler
         if mode == "ROV3":
@@ -98,6 +101,8 @@ class Main():
             self.logger.log("ERL task scheduler created")
         else:
             self.task_scheduler = TaskSchedululer(self.control, self.sensors, self.cameras, self.logger)
+            #self.movements.pid_turn_on()
+            #self.movements.set_lin_velocity(up=1)
             self.logger.log("Robosub task scheduler created")
 
     def run(self):

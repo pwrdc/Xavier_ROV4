@@ -28,16 +28,11 @@ IMG_PATH = args.image
 VIDEO = args.video
 FPS = args.fps
 
-print(PROJECT_ROOT)
-
 MODEL = NNManager.get_yolo_model(SELECTED_MODEL)
 
 def predict(img):
+    img = cv2.resize(img, (416, 416))
     results = MODEL.predict(img)
-
-    if len(results) > 0:
-        for result in results:
-            result.denormalize(img.shape[1], img.shape[0], inplace=True)
 
     return results
 
@@ -52,9 +47,10 @@ def prediction_img(img, wait_time=0):
 
     if len(predictions) > 0:
         for prediction in predictions:
+            prediction = prediction.denormalize(img.shape[1], img.shape[0])
             p1 = (int(prediction.x1), int(prediction.y1))
             p2 = (int(prediction.x2), int(prediction.y2))
-
+            print(prediction.detected_item)
             img = cv2.rectangle(img, p1, p2, (255,0,255))
 
     cv2.imshow('image', img)
@@ -88,14 +84,17 @@ def measure_fps(img, num_predictions=100):
     print(f"Avg fps was: {FPS}")
 
 if VISUALIZE:
+    print("visualize")
     if VIDEO is not None:
         video = cv2.VideoCapture(VIDEO)
         prediction_video(video)
     else:
+        image = cv2.imread(IMG_PATH)
         prediction_img(image)
 else: 
     image = cv2.imread(IMG_PATH)
     prediction_text(image)
     
 if FPS:
+    image = cv2.imread(IMG_PATH)
     measure_fps(image)

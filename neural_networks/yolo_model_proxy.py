@@ -9,7 +9,7 @@ class YoloModelProxy:
     Class for finding objects in image with Yolo architecture
     """
     def __init__(self, model_path: str, threshold = 0.5, is_secondary = False, input_tensor_name = "input:0", output_tensor_name = "output:0",
-                detector_type = "yolo"):
+                detector_type = "yolo", object="general"):
         """
         :param model_path: Path to model, relative to project root
         """
@@ -20,6 +20,7 @@ class YoloModelProxy:
         self.input_tensor_name = input_tensor_name
         self.output_tensor_name = output_tensor_name
         self.type = detector_type
+        self.object = object
 
     def load(self) -> None:
         """
@@ -46,6 +47,13 @@ class YoloModelProxy:
             return None
 
         result = self.server_task.post("predict", image)
+
+        if self.type == "yolo":
+            if result is not None:
+                result.detected_item = self.object
+                result = [result]
+            else:
+                result = []
 
         return result
 

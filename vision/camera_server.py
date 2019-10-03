@@ -28,6 +28,8 @@ def get_image(camera_name: str):
     img_bytes = requests.post(f"http://{IP}:{PORT}/get_image", data=pickle.dumps(camera_name)).content
     img = pickle.loads(img_bytes)
 
+    return img
+
 def set_bb(bounding_box: BoundingBox):
     requests.post(f"http://{IP}:{PORT}/set_bb", data=pickle.dumps(bounding_box)).content
 
@@ -100,7 +102,7 @@ if __name__ == "__main__":
         return pickle.dumps(bounding_box)
 
     @server.route("/get_image", methods=["POST"])
-    def predict():
+    def get_image():
         global images
         camera_id = pickle.loads(request.data)
         return pickle.dumps(images[camera_id])

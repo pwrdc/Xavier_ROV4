@@ -28,7 +28,7 @@ if __name__ == "__main__":
                         input_tensor_name=args.input_tensor, threshold=args.threshold)
     elif args.type == "darknet":
         print("DARKNET")
-        model = DarknetYoloModel(f"{PROJECT_ROOT}/{args.model}")
+        model = DarknetYoloModel(f"{PROJECT_ROOT}/{args.model}", threshold=args.threshold)
 
     model.load()
 

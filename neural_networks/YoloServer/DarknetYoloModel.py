@@ -62,8 +62,7 @@ class DarknetYoloModel:
                  returns None
         """
         #image = cv2.resize(image, (self.img_width, self.img_height))
-        print(image.shape)
-        results = detect(self.net, self.meta, image)
+        results = detect(self.net, self.meta, image, thresh=self.threshold, hier_thresh=self.threshold)
 
         detections = []
 
@@ -71,7 +70,7 @@ class DarknetYoloModel:
             return detections
 
         for result in results:
-            detection = str(result[0])
+            detection = result[0].decode('utf-8')
             probability = result[1]
             position = result[2]
 

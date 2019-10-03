@@ -12,4 +12,4 @@ class DistanceSensor:
 
         :return: distance in cm as single float
         '''
-        return self.rpi_reference.get_front_distance()
+        return 300#return float(self.rpi_reference.get_front_distance())

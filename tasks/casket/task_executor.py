@@ -1,7 +1,16 @@
+import time
 from tasks.task_executor_itf import ITaskExecutor
 from tasks.casket.locator.cv_solution.locator import  Locator as CVLocator
+from definitions import ANGLE_CASCET, TIME_CASCET
+from time import sleep
 
-import time
+MAX_THRUSTERS_POWER = 25
+TIME_OF_FRONT_MOVEMENT = TIME_CASCET
+
+SURFACE_DEPTH = 0.0
+
+DEFAULT_YAW = ANGLE_CASCET #180
+DEFAULT_DEPTH = 0.8
 
 class CasketTaskExecutor(ITaskExecutor):
     def __init__(self, control_dict, sensors_dict, cameras_dict, main_logger):
@@ -17,12 +26,18 @@ class CasketTaskExecutor(ITaskExecutor):
         """
         self.control_dict = control_dict
         self.sensors_dict = sensors_dict
-        self.movements = control_dict['movements']
+        self._movements = control_dict['movements']
         self._logger = main_logger
         self._bottom_cam = cameras_dict['bottom_camera']
 
     def run(self):
-        self.grab_vampire()
+        self._movements.pid_turn_on()
+        self._movements.pid_set_depth(DEFAULT_DEPTH)
+        #self._movements.pid_yaw_turn_on()
+        time.sleep(1)
+        
+        #self.grab_vampire()
+        self.surface_in_octagon()
 
     def grab_vampire(self):
         locator = CVLocator()
@@ -32,3 +47,14 @@ class CasketTaskExecutor(ITaskExecutor):
             vampire_coordinates = locator.get_vampire_coordinates(img)
             self._logger.log("got coordinates: "+str(vampire_coordinates))
             time.sleep(0.02)
+
+    def surface_in_octagon(self):
+        self._logger.log("moving to octagon")
+        self._movements.pid_set_yaw(DEFAULT_YAW)
+        sleep(2)
+        self._movements.set_lin_velocity(MAX_THRUSTERS_POWER)
+        time.sleep(TIME_OF_FRONT_MOVEMENT)
+        self._movements.set_lin_velocity()
+
+        self._logger.log("surface")
+        self._movements.pid_set_depth(SURFACE_DEPTH)
