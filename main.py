@@ -19,6 +19,7 @@ from communication.rpi_broker.distance import DistanceSensor
 from communication.rpi_broker.movements import Movements
 from communication.rpi_broker.torpedoes import Torpedoes
 from communication.rpi_broker.manipulator import Manipulator
+from communication.rpi_broker.dropper import Dropper
 
 #Task sceduller
 from tasks.tasks_scheduler import TaskSchedululer
@@ -76,6 +77,7 @@ class Main():
         self.depth_sensor = DepthSensor(self.rpi_reference)
         self.distance_sensor = DistanceSensor(self.rpi_reference)
         self.hydrophones = Hydrophones(self.rpi_reference)
+        self.dropper = Dropper(self.rpi_reference)
         self.logger.log("sensors created")
 
         self.sensors = {'ahrs': self.ahrs,
@@ -90,7 +92,8 @@ class Main():
 
         self.control = {'movements': self.movements,
                         'torpedoes': self.torpedoes,
-                        'manipulator': self.manipulator}
+                        'manipulator': self.manipulator,
+                        'dropper' : self.dropper}
 
         # task sheduler
         if mode == "ROV3":
