@@ -20,6 +20,7 @@ from communication.rpi_broker.movements import Movements
 from communication.rpi_broker.torpedoes import Torpedoes
 from communication.rpi_broker.manipulator import Manipulator
 from communication.rpi_broker.dropper import Dropper
+from communication.rpi_broker.lights import Lights
 
 #Task sceduller
 from tasks.tasks_scheduler import TaskSchedululer
@@ -88,12 +89,14 @@ class Main():
         self.movements = Movements(self.rpi_reference)
         self.torpedoes = Torpedoes(self.rpi_reference)
         self.manipulator = Manipulator(self.rpi_reference)
+        self.lights = Lights(self.rpi_reference)
         self.logger.log("control objects created")
 
         self.control = {'movements': self.movements,
                         'torpedoes': self.torpedoes,
                         'manipulator': self.manipulator,
-                        'dropper' : self.dropper}
+                        'dropper' : self.dropper,
+                        'lights' : self.lights}
 
         # task sheduler
         if mode == "ROV3":
