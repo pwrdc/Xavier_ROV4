@@ -6,6 +6,7 @@ from tasks.path.task_executor.opencv_task_executor import PathTaskExecutor as CV
 from tasks.auto_movements.prequalification import Prequalification
 from tasks.casket.task_executor import CasketTaskExecutor
 from tasks.garlic.task_executor import GarlicTaskExecutor
+from tasks.auto_movements.sponsor_event_19 import SponsorEvent19
 
 class TaskSchedululer(ITaskExecutor):
 
@@ -42,10 +43,15 @@ class TaskSchedululer(ITaskExecutor):
         #                                 self.cameras_dict, self.logger)
         #path_executor.run()
 
-        garlic_executor = GarlicTaskExecutor(self.control_dict, self.sensors_dict,
-                                             self.cameras_dict, self.logger)
-        garlic_executor.run()
+        #garlic_executor = GarlicTaskExecutor(self.control_dict, self.sensors_dict,
+        #                                     self.cameras_dict, self.logger)
+        #garlic_executor.run()
 
         #casket_executor = CasketTaskExecutor(self.control_dict, self.sensors_dict,
         #                                     self.cameras_dict, self.logger)
         #casket_executor.run()
+
+        sponsor = SponsorEvent19(self.control_dict, self.sensors_dict,
+                                 self.cameras_dict, self.logger)
+
+        sponsor.run()
