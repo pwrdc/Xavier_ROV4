@@ -11,6 +11,7 @@ from tasks.auto_movements.prequalification import Prequalification
 from tasks.casket.task_executor import CasketTaskExecutor
 from tasks.garlic.task_executor import GarlicTaskExecutor
 from tasks.garlic_drop.drop_task_executor import DropTaskExecutor
+from tasks.auto_movements.sponsor_event_19 import SponsorEvent19
 
 class TaskSchedululer(ITaskExecutor):
 
@@ -78,3 +79,8 @@ class TaskSchedululer(ITaskExecutor):
             casket_executor.run()
 
         self.logger.log("finish all tasks")
+
+        sponsor = SponsorEvent19(self.control_dict, self.sensors_dict,
+                                 self.cameras_dict, self.logger)
+
+        sponsor.run()
