@@ -4,13 +4,14 @@ import struct
 import pickle
 import threading 
 from logpy.LogPy import Logger
+import os
 
 
 # [BUGFIX] Socket binding error: [Errno 98] Address already in use
 # ->  Changing ports between 9999 and 8888 in create_socket() function and client.py may help
 
 class ServerXavier:
-    def __init__(self, host=str(socket.gethostbyname(socket.gethostname())), port=8888, black_and_white=False, retry_no=5):
+    def __init__(self, host=str(os.system('hostname -I')), port=8888, black_and_white=False, retry_no=5):
         """
         Initialize server
         :param host: [String] host address
@@ -138,6 +139,7 @@ class ServerXavier:
 
 
 if __name__ == "__main__":
+    #print(socket.gethostbyname(socket.gethostname()))
     serverXavier = ServerXavier()
     while True:
         serverXavier.socket_accept()
