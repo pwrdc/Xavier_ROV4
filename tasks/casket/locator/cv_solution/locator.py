@@ -1,4 +1,4 @@
-import vampire_detector # Zawiślak presonal library
+#import vampire_detector # Zawiślak presonal library
 
 from tasks.casket.locator.locator_itf import ILocator
 

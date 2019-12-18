@@ -1,4 +1,4 @@
-import path_detector # Zawislak library
+#import path_detector # Zawislak library
 from tasks.path.locator.locator_itf import ILocator
 
 
