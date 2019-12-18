@@ -6,7 +6,7 @@ from logpy.LogPy import Logger
 
 
 class CameraClient:
-    def __init__(self, host="localhost", port=8888, retry_no=5):
+    def __init__(self, host="192.168.0.103", port=8888, retry_no=5):
         """
         Initialize Camera Client Class
         :param host: [String] Server host

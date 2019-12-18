@@ -2,6 +2,7 @@ import socket
 import cv2
 import struct
 import pickle
+import threading 
 from logpy.LogPy import Logger
 
 
@@ -9,7 +10,7 @@ from logpy.LogPy import Logger
 # ->  Changing ports between 9999 and 8888 in create_socket() function and client.py may help
 
 class ServerXavier:
-    def __init__(self, host="localhost", port=8888, black_and_white=False, retry_no=5):
+    def __init__(self, host=str(socket.gethostbyname(socket.gethostname())), port=8888, black_and_white=False, retry_no=5):
         """
         Initialize server
         :param host: [String] host address
@@ -78,28 +79,37 @@ class ServerXavier:
     def socket_accept(self):
         """
         Accept connection from client
-        :return:
+        :return: None
         """
         conn, address = self.socket.accept()
-        self.logger.log(f"Connection has been established! | {str(address[0])}:{str(address[1])}")
+        self.logger.log(f"Connection has been established! | {address[0]}:{address[1]}")
+        threading.Thread(target=self.__handle_client, args=(conn,)).start()
+
+    def __handle_client(self, conn):
+        """
+        Handle client in separate function
+        :param conn: Client connection data
+        :return: None
+        """
         while True:
             data = conn.recv(1024).decode()
             if not data:
                 break
-            conn.send(self.__frame)
+            conn.send(self.__frame(h_flip=True))
         conn.close()
 
-    @property
-    def __frame(self):
+    def __frame(self, v_flip=False, h_flip=False):
         """
         Get picture frame
+        :param v_flip: [Bool] Is image flipped vertical
+        :param h_flip: [Bool] Is image flipped horizontal
         :return: frame
         """
         # Capture frame
         ret, frame = self.cameraCapture.read()
 
         # Handles the mirroring of the current frame
-        frame = cv2.flip(frame, 1)
+        frame = cv2.flip(frame, self.__flip(v_flip, h_flip))
 
         if self.bw:
             # Change color to black and white if decided
@@ -112,8 +122,23 @@ class ServerXavier:
         size = len(data)
         return struct.pack(">L", size) + data
 
+    def __flip(self, v_flip, h_flip):
+        """
+        Get flip parameter
+        :param v_flip: [Bool] Is image flipped vertical
+        :param h_flip: [Bool] Is image flipped horizontal
+        :return: [Int] value for cv2 flip method
+        """
+        if h_flip and v_flip:
+            return -1
+        elif v_flip:
+            return 0
+        else:
+            return 1
+
 
 if __name__ == "__main__":
     serverXavier = ServerXavier()
-    serverXavier.socket_accept()
+    while True:
+        serverXavier.socket_accept()
 
