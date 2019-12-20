@@ -5,7 +5,6 @@ import cv2
 from logpy.LogPy import Logger
 import time
 from datetime import date
-from serverXavier import ServerXavier
 
 HOST = "192.168.103"
 PORT = 8888
