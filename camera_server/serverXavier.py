@@ -7,11 +7,12 @@ from logpy.LogPy import Logger
 import os
 
 
-# [BUGFIX] Socket binding error: [Errno 98] Address already in use
-# ->  Changing ports between 9999 and 8888 in create_socket() function and client.py may help
+PORT = 8888
+
+CAMERA_ID = 2
 
 class ServerXavier:
-    def __init__(self, host=str(os.system('hostname -I')), port=8888, black_and_white=False, retry_no=5):
+    def __init__(self, host=str(os.system('hostname -I')), port=PORT, black_and_white=False, retry_no=5):
         """
         Initialize server
         :param host: [String] host address
@@ -23,10 +24,17 @@ class ServerXavier:
         self.port = port
         self.bw = black_and_white
         self.retryNo = retry_no
+        # start up camera
+        self.cameraCapture = cv2.VideoCapture(CAMERA_ID)
+        # append connected cameras
+        os.system('ls -d /dev/video*')
+        #append frame size
+        WIDTH = int(self.cameraCapture.get(3))
+        HEIGHT = int(self.cameraCapture.get(4))
+        print(f'Frame size: WIDTH: {WIDTH}, HEIGHT: {HEIGHT}')
         # set logger file
         self.logger = Logger(filename='serverXavier', title="ServerXavier")
-        # start up camera
-        self.cameraCapture = cv2.VideoCapture(0)
+
         if not self.__auto_retry(self.__create_socket()):
             self.logger.log(f"ERROR: Create socket failure")
             return
@@ -143,4 +151,5 @@ if __name__ == "__main__":
     serverXavier = ServerXavier()
     while True:
         serverXavier.socket_accept()
+        print(f"\tCamera {CAMERA_ID} is running...")
 

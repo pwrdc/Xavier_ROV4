@@ -5,10 +5,17 @@ import cv2
 from logpy.LogPy import Logger
 import time
 from datetime import date
+from serverXavier import ServerXavier
 
+HOST = "192.168.103"
+PORT = 8888
+
+FPS = 20
+WIDTH = 640
+HEIGHT = 480
 
 class CameraClient:
-    def __init__(self, host="192.168.0.103", port=8888, retry_no=5):
+    def __init__(self, host=HOST, port=PORT, retry_no=5):
         """
         Initialize Camera Client Class
         :param host: [String] Server host
@@ -105,7 +112,7 @@ def recordVid(camera_client, exit_key='q'):
     t = time.localtime()
     current_time = time.strftime("%H:%M:%S", t)
 
-    out = cv2.VideoWriter( f'videos/{current_date}_{current_time}.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 20, (640,480) )
+    out = cv2.VideoWriter( f'{current_date}_{current_time}.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), FPS, (WIDTH,HEIGHT) )
 
     while True:
         cv2.imshow(f'Press {exit_key} to exit', camera_client.frame)

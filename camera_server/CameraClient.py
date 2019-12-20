@@ -5,8 +5,12 @@ import cv2
 from logpy.LogPy import Logger
 
 
+HOST = '192.168.0.103'
+PORT = 8888
+
+
 class CameraClient:
-    def __init__(self, host="192.168.0.103", port=8888, retry_no=5):
+    def __init__(self, host=HOST, port=PORT, retry_no=5):
         """
         Initialize Camera Client Class
         :param host: [String] Server host
