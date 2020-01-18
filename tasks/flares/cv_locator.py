@@ -1,5 +1,6 @@
 import cv2 as cv
 import numpy as np
+from bounding_box import *
 
 
 def countLinesAverage(lines):
@@ -23,6 +24,50 @@ def countLinesAverage(lines):
             [int(sumX1 / counter), int(sumY1 / counter), int(sumX2 / counter), int(sumY2 / counter)])
 
     return lineFinal
+
+
+def findBoxDimensions(lines):
+    minX = 300000
+    minY = 300000
+    maxX = 0
+    maxY = 0
+    h = 0
+    w = 0
+
+    '''''
+    Finding maximum and minimum values of lines found by Probabilistic Hough lines algorithm
+    '''''
+
+    if lines is not None:
+        for i in range(0, len(lines)):
+            l = lines[i][0]
+            if l[0] < minX or l[2] < minX:
+                if l[0] < l[2]:
+                    minX = l[0]
+                else:
+                    minX = l[2]
+            if l[1] < minY or l[3] < minY:
+                if l[1] < l[3]:
+                    minY = l[1]
+                else:
+                    minY = l[3]
+            if l[0] > maxX or l[3] > maxX:
+                if l[0] > l[2]:
+                    maxX = l[0]
+                else:
+                    maxX = l[2]
+            if l[1] > maxY or l[3] > maxY:
+                if l[1] > l[3]:
+                    maxY
+                else:
+                    maxY = l[1]
+
+        h = maxY - minY
+        w = maxX - minX
+
+        size = (h, w)
+
+        return size
 
 
 def detectLines(image):
@@ -51,18 +96,25 @@ class FlareDetector:
 
     color = "red"
 
-    lowHRed = 140
+    '''''
+    Parameters used for threshold. Bottom and top values represented in HSV color model where
+    H stands for hue
+    S stands for saturation
+    V stands for value
+    Change of parameters may be needed due to conditions in pool (light etc.) 
+    '''''
+    lowHRed = 110
     highHRed = 179
-    lowSRed = 30
-    highSRed = 255
-    lowVRed = 100
-    highVRed = 255
+    lowSRed = 0
+    highSRed = 160
+    lowVRed = 0
+    highVRed = 200
 
-    lowHYellow = 60
-    highHYellow = 80
-    lowSYellow = 50
-    highSYellow = 255
-    lowVYellow = 70
+    lowHYellow = 32
+    highHYellow = 87
+    lowSYellow = 0
+    highSYellow = 180
+    lowVYellow = 80
     highVYellow = 255
     
     kernel = np.ones((9, 9), np.uint8)
@@ -96,6 +148,14 @@ class FlareDetector:
         image = cannyEdges(image)
         return image
 
+    def doMorphOperations(self, image):
+        cv.erode(image, self.kernel, iterations=1)
+        cv.dilate(image, self.kernel, iterations=1)
+        cv.dilate(image, self.kernel, iterations=1)
+        cv.erode(image, self.kernel, iterations=1)
+
+        return image
+
     def prepareImageYellow(self, image):
         image = cv.cvtColor(image, cv.COLOR_BGR2HSV)
         image = cv.inRange(image, np.array([self.lowHYellow, self.lowSYellow, self.lowVYellow]),
@@ -105,16 +165,13 @@ class FlareDetector:
         image = cannyEdges(image)
         return image
 
-    def doMorphOperations(self, image):
-        cv.erode(image, self.kernel, iterations=1)
-        cv.dilate(image, self.kernel, iterations=1)
-        cv.dilate(image, self.kernel, iterations=1)
-        cv.erode(image, self.kernel, iterations=1)
-
-        return image
-
     def findMiddlePoint(self, image):
         imageCloned = image
+
+        '''''
+        Checking whether flare is red or yellow based on verifying if any lines where found
+        for HSV set for red flare  
+        '''''
         image = self.prepareImageRed(image)
         lines = detectLines(image)
 
@@ -123,15 +180,24 @@ class FlareDetector:
             lines = detectLines(image)
             self.color = "yellow"
 
+        '''''
+        :param x: x coordinate of alleged flare's center point 
+        :param y: y coordinate of alleged flare's center point 
+        :param h: height of bounding box
+        :param w: width of bounding box
+        :return: return BoundingBox object, and color of the recognized flare
+        '''''
+
         line = countLinesAverage(lines)
+        size = findBoxDimensions(lines)
 
-        x = int((line[0] + line[2]) / 2) / (image.shape[0])
-        y = int((line[1] + line[3]) / 2) / (image.shape[1])
+        x = int((line[0] + line[2]) / 2)
+        y = int((line[1] + line[3]) / 2)
+        h = size[0]
+        w = size[1] 
 
-        point = {
-            "x": x,
-            "y": y,
-            "color": self.color
-        }
+        box = BoundingBox(x, y, w, h, 1)
 
-        return point
+        return box, self.color
+
+
