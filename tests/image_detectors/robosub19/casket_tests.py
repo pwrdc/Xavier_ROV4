@@ -3,9 +3,9 @@ import os
 import json
 from unittest import TestCase, TestSuite, TextTestRunner, makeSuite
 
-from tasks.casket.locator.cv_solution.locator import Locator as CVLocator
+from tasks.robosub19.casket.locator.cv_solution.locator import Locator as CVLocator
 
-PATH_DIRECOTRY = "./tests/image_detectors/casket/"
+PATH_DIRECOTRY = "./tests/image_detectors/robosub19/casket/"
 DELTA_CORDINATES = 0.05
 
 class TestRunner:

@@ -1,16 +1,16 @@
 from tasks.task_executor_itf import ITaskExecutor
 from definitions import TASKS   
 
-from tasks.gate.task_executor.gate_task_executor import GateTaskExecutor as GateExecutor
-from tasks.gate.task_executor.gate_mrn import GateMrn
-from tasks.path.task_executor.path_task_executor import PathTaskExecutor
-from tasks.path.task_executor.opencv_task_executor import PathTaskExecutor as CVPathTaskExecutor
-from tasks.buoys.buoys_task_executor import BuoysTaskExecutor
-from tasks.buoys.buyos_mrn import BuoysMrn
-from tasks.auto_movements.prequalification import Prequalification
-from tasks.casket.task_executor import CasketTaskExecutor
-from tasks.garlic.task_executor import GarlicTaskExecutor
-from tasks.garlic_drop.drop_task_executor import DropTaskExecutor
+from tasks.robosub19.gate.task_executor.gate_task_executor import GateTaskExecutor as GateExecutor
+from tasks.robosub19.gate.task_executor.gate_mrn import GateMrn
+from tasks.robosub19.path.task_executor.path_task_executor import PathTaskExecutor
+from tasks.robosub19.path.task_executor.opencv_task_executor import PathTaskExecutor as CVPathTaskExecutor
+from tasks.robosub19.buoys.buoys_task_executor import BuoysTaskExecutor
+from tasks.robosub19.buoys.buyos_mrn import BuoysMrn
+from tasks.robosub19.auto_movements.prequalification import Prequalification
+from tasks.robosub19.casket.task_executor import CasketTaskExecutor
+from tasks.robosub19.garlic.task_executor import GarlicTaskExecutor
+from tasks.robosub19.garlic_drop.drop_task_executor import DropTaskExecutor
 
 class TaskSchedululer(ITaskExecutor):
 

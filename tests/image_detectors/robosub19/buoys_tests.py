@@ -3,7 +3,7 @@ import os
 import json
 from unittest import TestCase, TestSuite, TextTestRunner, makeSuite
 
-from tasks.buoys.locator.cv_solution.locator import Locator as CVLocator
+from tasks.robosub19.buoys.locator.cv_solution.locator import Locator as CVLocator
 
 PATH_DIRECOTRY = "./tests/image_detectors/buoys/"
 DELTA_CORDINATES = 0.05

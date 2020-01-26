@@ -3,10 +3,10 @@ import os
 import json
 from unittest import TestCase, TestSuite, TextTestRunner, makeSuite
 
-from tasks.torpedoes.holes_detector import HeartDetector as CVLocatorHeart
-from tasks.torpedoes.holes_detector import EllipseDetector as CVLocatorEllipse
+from tasks.robosub19.torpedoes.holes_detector import HeartDetector as CVLocatorHeart
+from tasks.robosub19.torpedoes.holes_detector import EllipseDetector as CVLocatorEllipse
 
-PATH_DIRECOTRY = "./tests/image_detectors/torpedoes/"
+PATH_DIRECOTRY = "./tests/image_detectors/robosub19/torpedoes/"
 DELTA_CORDINATES = 0.05
 
 class TestRunner:

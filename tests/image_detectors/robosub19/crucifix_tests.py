@@ -3,9 +3,9 @@ import os
 import json
 from unittest import TestCase, TestSuite, TextTestRunner, makeSuite
 
-from tasks.crucifix.locator.cv_solution.locator import Locator as CVLocator
+from tasks.robosub19.crucifix.locator.cv_solution.locator import Locator as CVLocator
 
-PATH_DIRECOTRY = "./tests/image_detectors/crucifix/"
+PATH_DIRECOTRY = "./tests/image_detectors/robosub19/crucifix/"
 DELTA_CORDINATES = 0.05
 DELTA_ANGLE = 5
 

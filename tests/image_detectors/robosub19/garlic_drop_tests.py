@@ -3,9 +3,9 @@ import os
 import json
 from unittest import TestCase, TestSuite, TextTestRunner, makeSuite
 
-from tasks.garlic_drop.locator.cv_solution.locator import Locator as CVLocator
+from tasks.robosub19.garlic_drop.locator.cv_solution.locator import Locator as CVLocator
 
-PATH_DIRECOTRY = "./tests/image_detectors/garlic_drop/"
+PATH_DIRECOTRY = "./tests/image_detectors/robosub19/garlic_drop/"
 DELTA_CORDINATES = 0.05
 
 class TestRunner:
