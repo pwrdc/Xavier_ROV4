@@ -17,7 +17,7 @@ class PathTaskExecutor(ITaskExecutor):
         self._bottom_camera = cameras_dict['bottom_camera']
         self._bounding_box = BoundingBox(0, 0, 0, 0)
         self._logger = main_logger
-        self.config = get_config("tasks")['path_task']
+        self.config = get_config("robosub19_tasks")['path_task']
         # For which path we are taking angle. For each path, rotation 
         # angle might be set differently in cnfig.json
         self.number = 0

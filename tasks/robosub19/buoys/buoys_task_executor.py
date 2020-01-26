@@ -59,7 +59,7 @@ class BuoysTaskExecutor(ITaskExecutor):
         self.front_hit_time = 0.0
 
         self._bounding_box = BoundingBox(0, 0, 0, 0)
-        self.config = get_config("tasks")['gate_task']
+        self.config = get_config("robosub19_tasks")['gate_task']
 
     def run(self):
         self._logger.log("run buoy")

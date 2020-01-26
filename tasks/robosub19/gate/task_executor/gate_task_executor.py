@@ -19,7 +19,7 @@ class GateTaskExecutor(ITaskExecutor):
         self._front_camera = cameras_dict['front_cam1']
         self._bounding_box = BoundingBox(0, 0, 0, 0)
         self._logger = main_logger
-        self.config = get_config("tasks")['gate_task']
+        self.config = get_config("robosub19_tasks")['gate_task']
         self._target_depth = 0
         # For which path we are taking angle. For each path, rotation 
         # angle might be set differently in config.json

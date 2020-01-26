@@ -28,7 +28,7 @@ class DropTaskExecutor(ITaskExecutor):
         self._bottom_camera = cameras_dict['bottom_camera']
         self._bounding_box = BoundingBox(0, 0, 0, 0)
         self._logger = main_logger
-        self.config = get_config("tasks")['drop']
+        self.config = get_config("robosub19_tasks")['drop']
         # For which path we are taking angle. For each path, rotation 
         # angle might be set differently in cnfig.json
         self.number = 0
