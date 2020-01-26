@@ -3,7 +3,8 @@ import os
 import json
 from unittest import TestCase, TestSuite, TextTestRunner, makeSuite
 
-from tasks.torpedoes.holes_detector import HolesDetector as CVLocator
+from tasks.torpedoes.holes_detector import HeartDetector as CVLocatorHeart
+from tasks.torpedoes.holes_detector import EllipseDetector as CVLocatorEllipse
 
 PATH_DIRECOTRY = "./tests/image_detectors/torpedoes/"
 DELTA_CORDINATES = 0.05
@@ -49,16 +50,15 @@ class TestTorpedoLocatorCV(TestCase):
                 relative_filename = PATH_DIRECOTRY+filename
 
                 image = cv2.imread(relative_filename)
-                locator = CVLocator()
-                cordinates = locator.get_heart_cordinates(image)
+                locator = CVLocatorHeart()
+                coordinates = locator.get_heart_cordinates(image)
                 expected_coordinates = all_expected_coordinates[filename]
 
-                self.assertAlmostEqual(expected_coordinates['x'], cordinates['x'], delta=DELTA_CORDINATES)
-                self.assertAlmostEqual(expected_coordinates['y'], cordinates['y'], delta=DELTA_CORDINATES)
+                self.assertAlmostEqual(expected_coordinates['x'], coordinates['x'], delta=DELTA_CORDINATES)
+                self.assertAlmostEqual(expected_coordinates['y'], coordinates['y'], delta=DELTA_CORDINATES)
 
-    '''
-    def test_ellipse_coordinates(self):
-        # Test ellipse_coordinates method of CV solution
+    def test_get_ellipse_coordinates(self):
+        # Test get_heart_coordinates method of CV solution
         with open(PATH_DIRECOTRY + "ellipse_coordinates.json", "r") as read_file:
             all_expected_coordinates = json.load(read_file)
 
@@ -67,13 +67,16 @@ class TestTorpedoLocatorCV(TestCase):
                 relative_filename = PATH_DIRECOTRY+filename
 
                 image = cv2.imread(relative_filename)
-                locator = CVLocator()
-                cordinates = locator.get_ellipse_cordinates(image)
+                locator = CVLocatorEllipse()
+                coordinates = locator.get_ellipse_cordinates(image)
                 expected_coordinates = all_expected_coordinates[filename]
 
-                self.assertAlmostEqual(expected_coordinates['x'], cordinates['x'], delta=DELTA_CORDINATES)
-                self.assertAlmostEqual(expected_coordinates['y'], cordinates['y'], delta=DELTA_CORDINATES)
+                self.assertAlmostEqual(expected_coordinates['x_open'], coordinates['x_open'], delta=DELTA_CORDINATES)
+                self.assertAlmostEqual(expected_coordinates['y_open'], coordinates['y_open'], delta=DELTA_CORDINATES)
+                self.assertAlmostEqual(expected_coordinates['x_closed'], coordinates['x_closed'], delta=DELTA_CORDINATES)
+                self.assertAlmostEqual(expected_coordinates['y_closed'], coordinates['y_closed'], delta=DELTA_CORDINATES)
 
+    '''
     def test_get_lever_coordinates(self):
         # Test get_lever_coordinates method of CV solution
         with open(PATH_DIRECOTRY + "lever_coordinates.json", "r") as read_file:
