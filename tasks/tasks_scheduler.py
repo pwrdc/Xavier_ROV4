@@ -1,6 +1,6 @@
 from tasks.task_executor_itf import ITaskExecutor
 
-from tasks.gate.task_executor.gate_task_executor import GateTaskExecutor as GateExecutor
+from tasks.navigation.task_executor.gate_task_executor import GateTaskExecutor as GateExecutor
 from tasks.path.task_executor.path_task_executor import PathTaskExecutor
 from tasks.path.task_executor.opencv_task_executor import PathTaskExecutor as CVPathTaskExecutor
 from tasks.auto_movements.prequalification import Prequalification
