@@ -25,7 +25,10 @@ class GateTaskExecutor(ITaskExecutor):
         self.number = 0
 
     def run(self):
+        DEPTH = 1.0
+
         self._logger.log("Start gate task executor")
+        self._control.pid_set_depth(DEPTH)
         self._control.pid_turn_on()
         self._control.pid_yaw_turn_on()
         self._logger.log("gate: turn on depth and yaw contorl")
