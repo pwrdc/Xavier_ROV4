@@ -1,0 +1,31 @@
+{
+  "start": {
+        "x": 14,
+        "y": 1,
+        "yaw": 90
+    },
+  "navigation": {
+        "gate": {
+            "x": 14,
+            "y": 12
+        },
+        "flare": {
+          "x": 14,
+          "y": 8
+        }
+    },
+  "acquisition": {
+        "x": 10,
+        "y": 23
+  },
+    "localization": {
+        "flare1": {
+            "x": 0,
+            "y": 0
+        },
+      "flare2": {
+            "x": 0,
+            "y": 0
+        }
+    }
+}

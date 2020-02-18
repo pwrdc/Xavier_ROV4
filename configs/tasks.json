@@ -56,5 +56,24 @@
             "max_engine_power": 10,
             "go_time_seconds": 5
         }
+    },
+    "localization": {
+        "search": {
+            "max_ang_speed": 50,
+            "confidence_threshold": 0.9,
+            "max_time_sec": 40,
+            "moving_avg_discount": 0.9,
+            "rotation_angle": 30
+        },
+        "centering": {
+            "max_engine_power": 50,
+            "max_center_distance": 0.05,
+            "max_time_sec": 40,
+            "moving_avg_discount": 0.9
+        },
+        "go": {
+            "max_engine_power": 10,
+            "go_time_seconds": 5
+        }
     }
 }
