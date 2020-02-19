@@ -24,7 +24,7 @@ class GateTaskExecutor(ITaskExecutor):
         self._bounding_box = BoundingBox(0, 0, 0, 0)
         self._logger = main_logger
         self.movements = control_dict['movements']
-        self.config = get_config('tasks')['localization_task']
+        self.config = get_config('tasks')['localization']
         self.img_server = PythonRESTSubtask("utils/img_server.py", 6669)
         self.img_server.start()
         self.confidence = 0
@@ -32,7 +32,7 @@ class GateTaskExecutor(ITaskExecutor):
 
     ###Start the gate algorithm###
     def run(self):
-        MAX_TIME_SEC = get_config('search')['max_time_sec']
+        MAX_TIME_SEC = self.config['search']['max_time_sec']
         self._logger.log("Localization task executor started")
         self._control.pid_turn_on()
 
@@ -55,7 +55,7 @@ class GateTaskExecutor(ITaskExecutor):
         self.rotate_to_flare(flare_positions, auv_position)
 
         # szukaj flary
-        self.find_flare()
+        flare_position = self.find_flare()
 
         while True:
             # obróć się tak, aby flara była na środku obrazu
@@ -91,10 +91,14 @@ class GateTaskExecutor(ITaskExecutor):
     ###Find flare###
     # TODO: obsługa wykrycia dwóch flar, obsługa nie wykrycia flary po pełnym obrocie
     def find_flare(self):
+        """
+        :return: flare_position = {
+                    "distance": distance to flare perpendicular to image [m],
+                    "x": flare position from center of image to the right [m],
+                    "y": flare position from center of image to the upside [m]}
+        """
         self._logger.log("finding the flare")
         config = self.config['search']
-        MOVING_AVERAGE_DISCOUNT = config['moving_avg_discount']
-        CONFIDENCE_THRESHOLD = config['confidence_threshold']
 
         stopwatch = Stopwatch()
         stopwatch.start()
@@ -104,13 +108,14 @@ class GateTaskExecutor(ITaskExecutor):
             img = self._front_camera.get_image()
             if self.is_this_flare(img):
                 b_box, color = FlareDetector().findMiddlePoint(img)
-                return location_calculator(b_box, get_config("objects_size")["localization"]["flare"]["height"], "height")
+                return location_calculator(b_box, get_config("objects_size")["localization"]["flare"]["height"],
+                                           "height")
             # obróć się o ustalony kąt i zatrzymaj
-            self.movements.rotate_angle(0, 0, get_config('rotation_angle'))
+            self.movements.rotate_angle(0, 0, config['rotation_angle'])
 
     ###Dive###
     def dive(self):
-        depth = get_config('max_depth')
+        depth = self.config['max_depth']
         self._logger.log("Dive: setting depth")
         self._control.pid_set_depth(depth)
         self._logger.log("Dive: holding depth")
@@ -131,9 +136,9 @@ class GateTaskExecutor(ITaskExecutor):
         self.movements.rotate_angle(0, 0, angle)
 
     def is_this_flare(self, img):
-
-        MOVING_AVERAGE_DISCOUNT = get_config('moving_avg_discount')
-        CONFIDENCE_THRESHOLD = get_config('confidence_threshold')
+        config = self.config['search']
+        MOVING_AVERAGE_DISCOUNT = config['moving_avg_discount']
+        CONFIDENCE_THRESHOLD = config['confidence_threshold']
 
         bounding_box = YoloGateLocator().get_flare_bounding_box(img)
         self.post_image(img, bounding_box)
@@ -148,7 +153,6 @@ class GateTaskExecutor(ITaskExecutor):
         # Stop and report success if we are sure we found a path!
         if self.confidence > CONFIDENCE_THRESHOLD:
             self._logger.log("is_this_flare: flare found")
-            self._control.set_ang_velocity(0, 0, 0)
             return True
 
     def center_on_flare(self, flare_position):

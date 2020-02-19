@@ -58,6 +58,7 @@
         }
     },
     "localization": {
+        "max_depth": 1.5,
         "search": {
             "max_ang_speed": 50,
             "confidence_threshold": 0.9,
