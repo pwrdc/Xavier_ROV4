@@ -68,7 +68,7 @@
         },
         "centering": {
             "max_engine_power": 50,
-            "max_center_distance": 0.05,
+            "max_center_angle": 5,
             "max_time_sec": 40,
             "moving_avg_discount": 0.9
         },
