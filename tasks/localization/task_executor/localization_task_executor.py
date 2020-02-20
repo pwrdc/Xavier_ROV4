@@ -30,6 +30,8 @@ class GateTaskExecutor(ITaskExecutor):
         self.confidence = 0
         self.ahrs = self._sensors['ahrs']
 
+        self.flare_position = None
+
     ###Start the gate algorithm###
     def run(self):
         MAX_TIME_SEC = self.config['search']['max_time_sec']
@@ -70,10 +72,8 @@ class GateTaskExecutor(ITaskExecutor):
             if not self.go_to_flare():
                 self._logger.log("LocalizationTE: going towards flare")
 
-            # sprawdź czy flara została przewrócona (nagle jej nie widać)
             if self.is_flare_knocked():
-                # zakończ zadanie
-                pass
+                return True
 
             # sprawdź głośność pingera i porównaj z poprzednią wartością
             #   jeśli nie jest głośniej, przerwij pętlę i płyń do drugiej flary
@@ -93,15 +93,8 @@ class GateTaskExecutor(ITaskExecutor):
         self.img_server.post("set_img", img, unpickle_result=False)
 
     def find_flare(self):
-        """
-        :return: flare_position = {
-                    "distance": distance to flare perpendicular to image [m],
-                    "x": flare position from center of image to the right [m],
-                    "y": flare position from center of image to the upside [m]}
-        """
         # TODO: obsługa wykrycia dwóch flar
         #   obsługa nie wykrycia flary po pełnym obrocie
-        #   ograniczenie czasowe
 
         self._logger.log("finding the flare")
         config = self.config['search']
@@ -110,11 +103,18 @@ class GateTaskExecutor(ITaskExecutor):
         stopwatch.start()
         self._logger.log("started find gate loop")
 
-        while True:
-            img = self._front_camera.get_image()
-            if self.is_this_flare(img):
-                return True
+        while stopwatch < config['max_time_sec']:
+            # sprawdza kilka razy, dla pewności
+            #   (no i żeby confidence się zgadzało, bo bez tego to nawet jak raz wykryje, to nie przejdzie -
+            #       - przy moving_avg_discount=0.9 musi wykryć 10 razy z rzędu
+            for i in range(config['number_of_samples']):
+                img = self._front_camera.get_image()
+                if self.is_this_flare(img):
+                    return True
             self.movements.rotate_angle(0, 0, config['rotation_angle'])
+
+        self._logger.log("flare not found")
+        return False
 
     def is_this_flare(self, img):
         config = self.config['search']
@@ -122,7 +122,7 @@ class GateTaskExecutor(ITaskExecutor):
         CONFIDENCE_THRESHOLD = config['confidence_threshold']
 
         bounding_box = YoloGateLocator().get_flare_bounding_box(img)
-        self.post_image(img, bounding_box)
+        #self.post_image(img, bounding_box)
 
         if bounding_box is not None:
             self.confidence = mvg_avg(1, self.confidence, MOVING_AVERAGE_DISCOUNT)
@@ -131,7 +131,6 @@ class GateTaskExecutor(ITaskExecutor):
         else:
             self.confidence = mvg_avg(0, self.confidence, MOVING_AVERAGE_DISCOUNT)
 
-        # Stop and report success if we are sure we found a path!
         if self.confidence > CONFIDENCE_THRESHOLD:
             self._logger.log("is_this_flare: flare found")
             return True
@@ -166,17 +165,26 @@ class GateTaskExecutor(ITaskExecutor):
         while True:
             img = self._front_camera.get_image()
             b_box, color = FlareDetector().findMiddlePoint(img)
-            flare_position = location_calculator(b_box, flare_size, "height")
-            angle = -m.degrees(m.atan2(flare_position['x'], flare_position['distance']))
+            self.flare_position = location_calculator(b_box, flare_size, "height")
+            angle = -m.degrees(m.atan2(self.flare_position['x'], self.flare_position['distance']))
             if abs(angle) <= MAX_CENTER_ANGLE:
                 return True
             self.movements.rotate_angle(0, 0, angle)
 
     def go_to_flare(self):
-        pass
+        """
+        travels distance to flare + a little more to knock it
+        """
+        self.movements.move_distance(self.flare_position['distance'] + self.config['go']['distance_to_add_m'], 0, 0)
+        return True
 
     def is_pinger_louder(self):
         pass
 
     def is_flare_knocked(self):
-        pass
+        """
+        if doesn't see the flare, then it's knocked
+        """
+        img = self._front_camera.get_image()
+        if YoloGateLocator().get_flare_bounding_box(img) is None:
+            return True

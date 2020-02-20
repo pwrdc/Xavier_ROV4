@@ -64,7 +64,8 @@
             "confidence_threshold": 0.9,
             "max_time_sec": 40,
             "moving_avg_discount": 0.9,
-            "rotation_angle": 30
+            "rotation_angle": 30,
+            "number_of_samples": 15
         },
         "centering": {
             "max_engine_power": 50,
@@ -74,7 +75,8 @@
         },
         "go": {
             "max_engine_power": 10,
-            "go_time_seconds": 5
+            "go_time_seconds": 5,
+            "distance_to_add_m": 1
         }
     }
 }
