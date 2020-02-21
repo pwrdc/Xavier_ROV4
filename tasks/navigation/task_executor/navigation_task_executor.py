@@ -6,6 +6,7 @@ from structures.bounding_box import BoundingBox
 from utils.signal_processing import mvg_avg
 from configs.config import get_config
 from time import sleep
+from utils.python_rest_subtask import PythonRESTSubtask
 import cv2
 import math as m
 import numpy as np
@@ -13,12 +14,12 @@ import numpy as np
 class GateTaskExecutor(ITaskExecutor):
 
     ###Initialization###
-    def __init__(self, contorl_dict: Movements, sensors_dict, cameras_dict: Cameras, main_logger):
-        self._control = contorl_dict
+    def __init__(self, control_dict: Movements, sensors_dict, cameras_dict: Cameras, main_logger):
+        self._control = control_dict
         self._front_camera = cameras_dict['front_cam1']
         self._bounding_box = BoundingBox(0, 0, 0, 0)
         self._logger = main_logger
-        self.config = get_config("tasks")['gate_task']
+        self.config = get_config("tasks")['navigation']
         self.img_server = PythonRESTSubtask("utils/img_server.py", 6669)
         self.img_server.start()
         # For which path we are taking angle. For each path, rotation
@@ -26,11 +27,10 @@ class GateTaskExecutor(ITaskExecutor):
         self.number = 0
         self.path = []
 
-
     ###Start the gate algorithm###
     def run(self):
         MAX_TIME_SEC = self.config['max_time_sec'] #w configu trzeba zmienic bo na razie jest do samego gate
-        self._logger.log("Gate task executor started")
+        self._logger.log("Navigation task executor started")
         self._control.pid_turn_on()
 
         stopwatch = Stopwatch()
@@ -67,6 +67,7 @@ class GateTaskExecutor(ITaskExecutor):
         MAX_ANG_SPEED = config['max_ang_speed']
         MOVING_AVERAGE_DISCOUNT = config['moving_avg_discount']
         CONFIDENCE_THRESHOLD = config['confidence_threshold']
+        MAX_TIME_SEC = config['max_time_sec']
 
 
         self._control.set_ang_velocity(0, 0, MAX_ANG_SPEED)
@@ -75,7 +76,7 @@ class GateTaskExecutor(ITaskExecutor):
         stopwatch.start()
         self._logger.log("started find gate loop")
 
-        while True:
+        while stopwatch < MAX_TIME_SEC:
             img = self._front_camera.get_image()
 
             if self.is_this_gate(img):
@@ -110,7 +111,7 @@ class GateTaskExecutor(ITaskExecutor):
         if bounding_box is not None:
             confidence = mvg_avg(1, confidence, MOVING_AVERAGE_DISCOUNT) #co robi funkcja mvg_avg
             self._bounding_box.mvg_avg(bounding_box, 0.5, True)
-            self._logger.log("is_this_gate: somoething detected")
+            self._logger.log("is_this_gate: something detected")
         else:
             confidence = mvg_avg(0, confidence, MOVING_AVERAGE_DISCOUNT)
 

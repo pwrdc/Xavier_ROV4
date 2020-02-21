@@ -1,6 +1,6 @@
 from tasks.task_executor_itf import ITaskExecutor, Cameras
 from communication.rpi_broker.movements import Movements
-from tasks.localization.locator.ml_solution.yolo_soln import YoloGateLocator
+from tasks.localization.locator.ml_solution.yolo_soln import YoloFlareLocator
 from utils.stopwatch import Stopwatch
 from structures.bounding_box import BoundingBox
 from utils.signal_processing import mvg_avg
@@ -11,7 +11,6 @@ from tasks.localization.locator.cv_locator import FlareDetector
 from time import sleep
 import cv2
 import math as m
-import numpy as np
 
 
 class GateTaskExecutor(ITaskExecutor):
@@ -29,79 +28,44 @@ class GateTaskExecutor(ITaskExecutor):
         self.img_server.start()
         self.confidence = 0
         self.ahrs = self._sensors['ahrs']
+        self.hydrophones = self._sensors['hydrophones']
 
         self.flare_position = None
 
     ###Start the gate algorithm###
     def run(self):
-        MAX_TIME_SEC = self.config['search']['max_time_sec']
-        objects_position = get_config('objects_position')
         self._logger.log("Localization task executor started")
         self._control.pid_turn_on()
 
-        stopwatch = Stopwatch()
-        stopwatch.start()
+        self.dive()
 
-        if stopwatch >= MAX_TIME_SEC:
-            self._logger.log("TIME EXPIRED FLARE NOT FOUND")
-            # przerwij zadanie
-
-        # zanurz się na odpowiednią do zadania głębokość
-        if not self.dive():
-            self._logger.log("LocalizationTE: diving in progress")
-
-        # przybliżone położenie flar
-        flare_positions = [objects_position['flare1'], objects_position['flare2']]
-
-        # przybliżone położenie łodzi z poprzedniego zadania
-        # TODO: poprzednie zadanie pobierać przez argument wejściowy
-        auv_position = objects_position['acquisition']
-
-        self.rotate_to_flare(flare_positions, auv_position)
+        self.center_on_pinger()
 
         if not self.find_flare():
-            self._logger.log("LocalizationTE: finding flare in progress")
+            self._logger.log("couldn't find flare - task failed, aborting")
+            return False
 
-        # TODO: kontynuować tylko jeśli find_flare() zwróci True
         while True:
-            # obróć się tak, aby flara była na środku obrazu
             if not self.center_on_flare():
-                self._logger.log("LocalizationTE: centering on flare in progress")
+                self._logger.log("couldn't center on flare - task failed, aborting")
+                return False
 
-            # płyń prosto przez określony czas / określony dystans (do ustalenia)
-            if not self.go_to_flare():
-                self._logger.log("LocalizationTE: going towards flare")
-
-            if self.is_flare_knocked():
-                return True
-
-            # sprawdź głośność pingera i porównaj z poprzednią wartością
-            #   jeśli nie jest głośniej, przerwij pętlę i płyń do drugiej flary
-            # TODO: no właśnie zmiana na płynięcie do drugiej flary xD
-            if not self.is_pinger_louder():
-                break
-
-# Przycina obraz, zostaje sam bbox
-    def post_image(self, img, bounding_box=None):
-        if bounding_box is not None:
-            self.img_server.post("set_img", img, unpickle_result=False)
-            bb = bounding_box.denormalize(img.shape[1], img.shape[0])
-            p1 = (int(bb.x1), int(bb.y1))
-            p2 = (int(bb.x2), int(bb.y2))
-            img = cv2.rectangle(img, p1, p2, (255,0,255))
-        self._logger.log("img posted")
-        self.img_server.post("set_img", img, unpickle_result=False)
+            # if traveled whole distance to flare, checked if flare knocked
+            # else repeat loop
+            if self.go_to_flare():
+                if self.is_flare_knocked():
+                    self._logger.log("knocked flare - task finished successfully")
+                    return True
 
     def find_flare(self):
         # TODO: obsługa wykrycia dwóch flar
-        #   obsługa nie wykrycia flary po pełnym obrocie
 
         self._logger.log("finding the flare")
         config = self.config['search']
 
         stopwatch = Stopwatch()
         stopwatch.start()
-        self._logger.log("started find gate loop")
+        self._logger.log("started find flare loop")
 
         while stopwatch < config['max_time_sec']:
             # sprawdza kilka razy, dla pewności
@@ -121,7 +85,7 @@ class GateTaskExecutor(ITaskExecutor):
         MOVING_AVERAGE_DISCOUNT = config['moving_avg_discount']
         CONFIDENCE_THRESHOLD = config['confidence_threshold']
 
-        bounding_box = YoloGateLocator().get_flare_bounding_box(img)
+        bounding_box = YoloFlareLocator().get_flare_bounding_box(img)
         #self.post_image(img, bounding_box)
 
         if bounding_box is not None:
@@ -135,7 +99,6 @@ class GateTaskExecutor(ITaskExecutor):
             self._logger.log("is_this_flare: flare found")
             return True
 
-    ###Dive###
     def dive(self):
         depth = self.config['max_depth']
         self._logger.log("Dive: setting depth")
@@ -143,48 +106,97 @@ class GateTaskExecutor(ITaskExecutor):
         self._logger.log("Dive: holding depth")
         self._control.pid_hold_depth()
 
-    # obróć się w stronę bliższej żółtej flary
-    #   kąt obrotu obliczany na podstawie wcześniej określonego przybliżonego położenia flar
-    #   i przybliżonego położenia łodzi z poprzedniego zadania
-    def rotate_to_flare(self, flare_positions, auv_position):
-        distances = []
-        for flare_position in flare_positions:
-            distances.append(
-                m.sqrt((flare_position["x"] - auv_position["x"]) ** 2 + (flare_position["y"] - auv_position["y"]) ** 2))
-        # pozycja najbliższej flary
-        flare_position = flare_positions[distances.index(min(distances))]
-        angle = m.atan2(flare_position['y'] - auv_position['y'],
-                        flare_position['x'] - auv_position['x']) - self.ahrs.get_yaw()
-        self.movements.rotate_angle(0, 0, angle)
-
     def center_on_flare(self):
-        # TODO: ograniczenie czasowe
+        """
+        rotates in vertical axis so flare is in the middle of an image
+        TODO: obsługa dwóch flar
+        """
         config = self.config['centering']
         flare_size = get_config("objects_size")["localization"]["flare"]["height"]
-        MAX_CENTER_ANGLE = config['max_center_angle']
-        while True:
+
+        MAX_CENTER_ANGLE_DEG = config['max_center_angle_deg']
+        MAX_TIME_SEC = config['max_time_sec']
+
+        stopwatch = Stopwatch()
+        stopwatch.start()
+
+        while stopwatch <= MAX_TIME_SEC:
             img = self._front_camera.get_image()
             b_box, color = FlareDetector().findMiddlePoint(img)
             self.flare_position = location_calculator(b_box, flare_size, "height")
             angle = -m.degrees(m.atan2(self.flare_position['x'], self.flare_position['distance']))
-            if abs(angle) <= MAX_CENTER_ANGLE:
+            if abs(angle) <= MAX_CENTER_ANGLE_DEG:
+                self._logger.log("centered on flare successfully")
                 return True
             self.movements.rotate_angle(0, 0, angle)
+        self._logger.log("couldn't center on flare")
+        return False
 
     def go_to_flare(self):
         """
-        travels distance to flare + a little more to knock it
+        moves distance to flare + a little more to knock it
+        :return: True - if managed to move distance in time
+                 False - if didn't manage to move distance in time
         """
-        self.movements.move_distance(self.flare_position['distance'] + self.config['go']['distance_to_add_m'], 0, 0)
-        return True
+        config = self.config['go']
+        MAX_TIME_SEC = config['max_time_sec']
 
-    def is_pinger_louder(self):
-        pass
+        stopwatch = Stopwatch()
+        stopwatch.start()
+
+        self.movements.move_distance(self.flare_position['distance'] + self.config['go']['distance_to_add_m'], 0, 0)
+
+        if stopwatch <= MAX_TIME_SEC:
+            self._logger.log("go_to_flare - traveled whole distance")
+            return True
+        else:
+            self._logger.log("go_to_flare - didn't travel whole distance")
+            return False
+
+    def center_on_pinger(self):
+        """
+        rotates in vertical axis so pinger signal is in front
+        """
+        config = self.config['centering']
+        MAX_TIME_SEC = config['max_time_sec']
+        MAX_CENTER_ANGLE_DEG = config['max_center_angle_deg']
+
+        self._logger.log("centering on pinger")
+        stopwatch = Stopwatch()
+        stopwatch.start()
+
+        while stopwatch < MAX_TIME_SEC:
+            angle = self.hydrophones.get_angle()
+            if angle is None:
+                self._logger.log("no signal from hydrophones - locating pinger failed")
+                return False
+            if abs(angle) < MAX_CENTER_ANGLE_DEG:
+                self._logger.log("centered on pinger successfully")
+                return True
+            self.movements.rotate_angle(0, 0, angle)
+        self._logger.log("couldn't ceneter on pinger")
+        return False
 
     def is_flare_knocked(self):
         """
         if doesn't see the flare, then it's knocked
         """
         img = self._front_camera.get_image()
-        if YoloGateLocator().get_flare_bounding_box(img) is None:
+        if YoloFlareLocator().get_flare_bounding_box(img) is None:
+            self._logger.log("can't see flare - flare knocked")
             return True
+        self._logger.log("flare still visible - flare not knocked")
+        return False
+
+    def post_image(self, img, bounding_box=None):
+        """
+        wrzuca obraz wykrytej flary, nic ważnego
+        """
+        if bounding_box is not None:
+            self.img_server.post("set_img", img, unpickle_result=False)
+            bb = bounding_box.denormalize(img.shape[1], img.shape[0])
+            p1 = (int(bb.x1), int(bb.y1))
+            p2 = (int(bb.x2), int(bb.y2))
+            img = cv2.rectangle(img, p1, p2, (255,0,255))
+        self._logger.log("img posted")
+        self.img_server.post("set_img", img, unpickle_result=False)
