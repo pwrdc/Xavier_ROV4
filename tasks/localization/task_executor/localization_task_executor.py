@@ -39,13 +39,14 @@ class GateTaskExecutor(ITaskExecutor):
 
         self.dive()
 
-        self.center_on_pinger()
-
-        if not self.find_flare():
-            self._logger.log("couldn't find flare - task failed, aborting")
-            return False
+        self._logger.log("starting localization task loop")
 
         while True:
+            self.center_on_pinger()
+
+            if not self.find_flare():
+                self._logger.log("couldn't find flare - task failed, aborting")
+                return False
             if not self.center_on_flare():
                 self._logger.log("couldn't center on flare - task failed, aborting")
                 return False
